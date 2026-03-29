@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>上海财经大学基层就业地图</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; width: 100%; overflow: hidden; background: #ffffff; }
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; display: flex; flex-direction: column; }
+        
+        /* 顶部标题 */
+        .main-header { width: 100%; padding: 15px 0; text-align: center; border-bottom: 1px solid #f0f0f0; background: #fff; z-index: 20; }
+        .main-header h1 { color: #d6292b; font-size: 1.5rem; font-weight: bold; }
+
+        /* 地图容器 */
+        .map-container { flex-grow: 1; position: relative; width: 100%; overflow: hidden; }
+        #china-map { width: 100%; height: 100%; }
+
+        /* 左上角 Logo 区域 */
+        .logo-bar { position: absolute; top: 10px; left: 15px; z-index: 10; pointer-events: none; }
+        .logo-bar img { height: 40px; opacity: 0.9; }
+
+        /* 底部/侧边信息卡片 */
+        .info-card { 
+            position: absolute; 
+            bottom: 20px; 
+            left: 20px; 
+            right: 20px; 
+            z-index: 10; 
+            background: rgba(255,255,255,0.95); 
+            border-left: 5px solid #d6292b; 
+            padding: 20px; 
+            border-radius: 4px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15); 
+        }
+        .region-name { font-size: 1.6rem; font-weight: bold; color: #d6292b; margin-bottom: 8px; }
+        #regionData { font-size: 1rem; line-height: 1.6; color: #333; }
+        .hint { color: #999; font-size: 0.85rem; margin-top: 5px; }
+
+        /* 适配大屏幕电脑 */
+        @media (min-width: 768px) {
+            .main-header h1 { font-size: 2.2rem; }
+            .info-card { width: 350px; right: auto; bottom: 40px; left: 40px; }
+            .logo-bar img { height: 60px; }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@4.9.0/map/js/china.js"></script>
+</head>
+<body>
+
+<div class="main-header">
+    <h1>上海财经大学基层就业地图</h1>
+</div>
+
+<div class="map-container">
+    <div id="china-map"></div>
+    <div class="logo-bar">
+        <img src="SufeLogo.png" alt="SUFE LOGO" onerror="this.style.display='none'">
+    </div>
+    <div class="info-card">
+        <div class="region-name" id="selectedRegion">全国总览</div>
+        <div id="regionData">点击各省份查看基层就业政策与选调录取详情</div>
+        <p class="hint">再次点击已选省份可缩小恢复</p>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // 1. 各省份中心坐标（用于点击后的精准定位）
+        const geoCoordMap = {
+            '台湾': [121.5, 25.0], '黑龙江': [127.6, 46.7], '内蒙古': [111.6, 40.8], '吉林': [125.3, 43.8], '北京': [116.4, 39.9], '辽宁': [123.4, 41.7], '河北': [114.5, 38.0], '天津': [117.1, 39.1], '山西': [112.5, 37.8], '陕西': [108.9, 34.2], '甘肃': [103.8, 36.0], '宁夏': [106.2, 38.4], '青海': [101.7, 36.6], '新疆': [87.6, 43.7], '西藏': [91.1, 29.6], '四川': [104.0, 30.6], '重庆': [106.5, 29.5], '山东': [117.0, 36.6], '河南': [113.6, 34.7], '江苏': [118.7, 32.0], '安徽': [117.2, 31.8], '湖北': [114.2, 30.5], '湖南': [112.9, 28.1], '江西': [115.8, 28.6], '浙江': [120.1, 30.2], '福建': [119.3, 26.0], '广东': [113.2, 23.1], '广西': [108.3, 22.8], '海南': [110.3, 20.0], '上海': [121.4, 31.2], '贵州': [106.7, 26.5], '云南': [102.7, 25.0]
+        };
+
+        // 2. 模拟政策数据（你可以后续在这里添加更多数据）
+        const policyData = [
+            { name: '上海', policy: '选调生/“三支一扶”', info: '重点面向高水平大学招录，待遇优厚。' },
+            { name: '新疆', policy: '西部计划/兵团选调', info: '落户优惠，生活补贴标准高。' },
+            { name: '四川', policy: '紧缺专业选调生', info: '针对研究生学历有专项培养计划。' }
+        ];
+
+        const chart = echarts.init(document.getElementById('china-map'));
+        let currentSelected = null; // 记录当前选中的省份
+
+        // 3. 配置初始地图
+        const option = {
+            tooltip: { trigger: 'item', formatter: '{b}' },
+            series: [{
+                name: 'chinaMap',
+                type: 'map',
+                map: 'china',
+                roam: true, // 允许手动缩放和平移
+                zoom: 1.2,
+                label: { 
+                    show: true, 
+                    fontSize: 10,
+                    color: '#666'
+                },
+                itemStyle: { 
+                    areaColor: '#f9f9f9', 
+                    borderColor: '#ccc',
+                    borderWidth: 1
+                },
+                emphasis: { 
+                    itemStyle: { areaColor: '#ffe4e1' } // 鼠标悬停色：淡肉粉色
+                },
+                // 选中后的状态配置
+                select: {
+                    disabled: false, // 启用选中功能
+                    itemStyle: { 
+                        areaColor: '#0052d9', // 选中色：深蓝色
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    },
+                    label: { color: '#fff', fontWeight: 'bold' }
+                },
+                selectedMode: 'single', // 单选模式
+                data: policyData // 只有在 data 里的省份才会应用特定逻辑
+            }]
+        };
+
+        chart.setOption(option);
+
+        // 4. 处理点击逻辑
+        chart.on('click', function(params) {
+            const targetName = params.name;
+
+            // 如果点击的是已经选中的省份 -> 恢复全国视角
+            if (currentSelected === targetName) {
+                chart.dispatchAction({ type: 'unSelect', name: targetName }); // 取消蓝色高亮
+                chart.setOption({
+                    series: [{ center: null, zoom: 1.2 }]
+                });
+                document.getElementById('selectedRegion').innerText = "全国总览";
+                document.getElementById('regionData').innerText = "点击各省份查看基层就业政策与选调录取详情";
+                currentSelected = null;
+            } 
+            // 如果点击的是新省份 -> 变蓝、放大、居中、更新文字
+            else {
+                currentSelected = targetName;
+                
+                // 更新文字信息
+                const match = policyData.find(p => p.name === targetName);
+                document.getElementById('selectedRegion').innerText = targetName;
+                document.getElementById('regionData').innerHTML = match ? 
+                    `<strong>政策：</strong>${match.policy}<br><strong>详情：</strong>${match.info}` : 
+                    "暂无该地区详细数据，正在持续更新中...";
+
+                // 放大定位
+                const pos = geoCoordMap[targetName];
+                chart.setOption({
+                    series: [{
+                        center: pos ? pos : null,
+                        zoom: 4,
+                        transition: ['center', 'zoom'] // 平滑过渡
+                    }]
+                });
+            }
+        });
+
+        // 5. 窗口大小调整
+        window.addEventListener('resize', () => chart.resize());
+    })();
+</script>
+</body>
+</html>
