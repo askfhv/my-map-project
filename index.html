@@ -1,146 +1,278 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>上财基层就业地图 - 专业缩放版</title>
+    <title>上财基层就业地图</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { height: 100%; width: 100%; overflow: hidden; background: #ffffff; }
-        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; display: flex; flex-direction: column; }
-        
-        .main-header { width: 100%; padding: 15px 0; text-align: center; border-bottom: 1px solid #f0f0f0; background: #fff; z-index: 20; }
-        .main-header h1 { color: #d6292b; font-size: 1.5rem; font-weight: bold; }
-
-        .map-container { flex-grow: 1; position: relative; width: 100%; overflow: hidden; }
-        #china-map { width: 100%; height: 100%; }
-
-        .logo-bar { position: absolute; top: 10px; left: 15px; z-index: 10; pointer-events: none; }
-        .logo-bar img { height: 40px; opacity: 0.9; }
-
-        .info-card { 
-            position: absolute; 
-            bottom: 20px; left: 20px; right: 20px; z-index: 10; 
-            background: rgba(255,255,255,0.95); 
-            border-left: 5px solid #d6292b; 
-            padding: 20px; border-radius: 4px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15); 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .region-name { font-size: 1.6rem; font-weight: bold; color: #d6292b; margin-bottom: 8px; }
-        #regionData { font-size: 1rem; line-height: 1.6; color: #333; }
-        .hint { color: #999; font-size: 0.85rem; margin-top: 5px; }
+
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            background: #ffffff;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-header {
+            width: 100%;
+            padding: 15px 0;
+            text-align: center;
+            border-bottom: 1px solid #f0f0f0;
+            background: #fff;
+            z-index: 20;
+        }
+
+        .main-header h1 {
+            color: #d6292b;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .map-container {
+            flex-grow: 1;
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        #china-map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .logo-bar {
+            position: absolute;
+            top: 10px;
+            left: 15px;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .logo-bar img {
+            height: 40px;
+            opacity: 0.9;
+        }
+
+        .info-card {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.95);
+            border-left: 5px solid #d6292b;
+            padding: 20px;
+            border-radius: 4px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .region-name {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #d6292b;
+            margin-bottom: 8px;
+        }
+
+        #regionData {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        #back-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 30;
+            display: none;
+            padding: 10px 20px;
+            background: #d6292b;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
 
         @media (min-width: 768px) {
-            .main-header h1 { font-size: 2.2rem; }
-            .info-card { width: 350px; right: auto; bottom: 40px; left: 40px; }
-            .logo-bar img { height: 60px; }
+            .main-header h1 {
+                font-size: 2.2rem;
+            }
+
+            .info-card {
+                width: 350px;
+                right: auto;
+                bottom: 40px;
+                left: 40px;
+            }
+
+            .logo-bar img {
+                height: 60px;
+            }
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/echarts@4.9.0/map/js/china.js"></script>
 </head>
+
 <body>
 
-<div class="main-header">
-    <h1>上海财经大学基层就业地图</h1>
-</div>
-
-<div class="map-container">
-    <div id="china-map"></div>
-    <div class="logo-bar">
-        <img src="SufeLogo.png" alt="SUFE LOGO" onerror="this.style.display='none'">
+    <div class="main-header">
+        <h1>上海财经大学基层就业地图</h1>
     </div>
-    <div class="info-card">
-        <div class="region-name" id="selectedRegion">全国总览</div>
-        <div id="regionData">点击各省份查看基层就业政策与选调录取详情</div>
-        <p class="hint">再次点击已选省份可缩小恢复</p>
+
+    <div class="map-container">
+        <div id="china-map"></div>
+        <button id="back-btn">返回全国视图</button>
+        <div class="logo-bar">
+            <img src="SufeLogo.png" alt="SUFE LOGO" onerror="this.style.display='none'">
+        </div>
+        <div class="info-card">
+            <div class="region-name" id="selectedRegion">全国总览</div>
+            <div id="regionData">点击各省份查看基层就业政策与选调录取详情</div>
+        </div>
     </div>
-</div>
 
-<script>
-    (function() {
-        // 1. 各省中心点坐标
-        const geoCoordMap = {
-            '台湾': [121.5, 25.0], '黑龙江': [127.6, 46.7], '内蒙古': [111.6, 40.8], '吉林': [125.3, 43.8], '北京': [116.4, 39.9], '辽宁': [123.4, 41.7], '河北': [114.5, 38.0], '天津': [117.1, 39.1], '山西': [112.5, 37.8], '陕西': [108.9, 34.2], '甘肃': [103.8, 36.0], '宁夏': [106.2, 38.4], '青海': [101.7, 36.6], '新疆': [87.6, 43.7], '西藏': [91.1, 29.6], '四川': [104.0, 30.6], '重庆': [106.5, 29.5], '山东': [117.0, 36.6], '河南': [113.6, 34.7], '江苏': [118.7, 32.0], '安徽': [117.2, 31.8], '湖北': [114.2, 30.5], '湖南': [112.9, 28.1], '江西': [115.8, 28.6], '浙江': [120.1, 30.2], '福建': [119.3, 26.0], '广东': [113.2, 23.1], '广西': [108.3, 22.8], '海南': [110.3, 20.0], '上海': [121.4, 31.2], '贵州': [106.7, 26.5], '云南': [102.7, 25.0]
-        };
+    <script>
+        (function () {
+            const chart = echarts.init(document.getElementById('china-map'));
+            const backBtn = document.getElementById('back-btn');
+            let currentLevel = 'china'; // 'china' or 'shanghai'
+            let currentSelected = null;
 
-        // 2. 【核心】自适应缩放配置（根据省份大小手动校准）
-        const zoomConfig = {
-            '新疆': 2.2, '西藏': 2.3, '内蒙古': 2.5, '青海': 3.5,
-            '四川': 4.5, '黑龙江': 4.5, '甘肃': 5, '云南': 5.5,
-            '广东': 7, '湖南': 7, '湖北': 7, '河南': 7, '山东': 7, '广西': 7,
-            '江苏': 8, '河北': 7, '浙江': 8, '福建': 8, '安徽': 8, '江西': 8,
-            '陕西': 7, '贵州': 8, '山西': 7, '辽宁': 7, '吉林': 7,
-            '北京': 12, '天津': 12, '上海': 15, '重庆': 8, '海南': 10, '宁夏': 10, '台湾': 10
-        };
+            // 1. 坐标配置
+            const geoCoordMap = {
+                '北京市': [116.40, 39.90], '天津市': [117.19, 39.12], '上海市': [121.47, 31.23], '重庆市': [106.50, 29.53],
+                '河北省': [114.50, 38.04], '山西省': [112.54, 37.85], '辽宁省': [123.42, 41.79], '吉林省': [125.32, 43.88],
+                '黑龙江省': [126.64, 45.75], '江苏省': [118.76, 32.04], '浙江省': [120.15, 30.28], '安徽省': [117.28, 31.86],
+                '福建省': [119.30, 26.07], '江西省': [115.89, 28.67], '山东省': [117.00, 36.67], '河南省': [113.66, 34.75],
+                '湖北省': [114.29, 30.58], '湖南省': [112.98, 28.19], '广东省': [113.28, 23.12], '海南省': [110.33, 20.03],
+                '四川省': [104.06, 30.67], '贵州省': [106.71, 26.57], '云南省': [102.71, 25.04], '陕西省': [108.94, 34.26],
+                '甘肃省': [103.82, 36.05], '青海省': [101.77, 36.62], '台湾省': [121.50, 25.04], '内蒙古自治区': [111.67, 40.81],
+                '广西壮族自治区': [108.32, 22.82], '西藏自治区': [91.11, 29.97], '宁夏回族自治区': [106.27, 38.46],
+                '新疆维吾尔自治区': [87.61, 43.79], '香港特别行政区': [114.17, 22.27], '澳门特别行政区': [113.54, 22.19]
+            };
 
-        const policyData = [
-            { name: '上海', policy: '选调生/“三支一扶”', info: '重点面向高水平大学招录，待遇优厚。' },
-            { name: '新疆', policy: '西部计划/兵团选调', info: '落户优惠，生活补贴标准高。' }
-        ];
+            const zoomConfig = {
+                // 巨型区域
+                '新疆维吾尔自治区': 2.2, '西藏自治区': 2.3, '内蒙古自治区': 2.5, '青海省': 3.5,
+                // 大型省份
+                '四川省': 4.5, '黑龙江省': 4.5, '甘肃省': 5, '云南省': 5.5,
+                // 中型省份
+                '广东省': 7, '湖南省': 7, '湖北省': 7, '河南省': 7, '山东省': 7, '江西省': 7,
+                '福建省': 7, '安徽省': 7, '浙江省': 7, '江苏省': 8, '河北省': 7, '山西省': 7,
+                '辽宁省': 7, '吉林省': 7, '广西壮族自治区': 7, '贵州省': 7, '陕西省': 7,
+                // 小型/直辖市
+                '北京市': 12, '天津市': 12, '上海市': 15, '重庆市': 8, '海南省': 10,
+                '宁夏回族自治区': 10, '台湾省': 10, '香港特别行政区': 20, '澳门特别行政区': 25
+            };
 
-        const chart = echarts.init(document.getElementById('china-map'));
-        let currentSelected = null;
+            const policyData = [
+                { name: '上海市', policy: '选调生/“三支一扶”', info: '重点面向高水平大学招录，待遇优厚。' },
+                { name: '新疆维吾尔自治区', policy: '西部计划/兵团选调', info: '落户优惠，生活补贴标准高。' }
+            ];
 
-        const option = {
-            tooltip: { trigger: 'item', formatter: '{b}' },
-            series: [{
-                name: 'chinaMap',
-                type: 'map',
-                map: 'china',
-                roam: true,
-                zoom: 1.2,
-                label: { show: true, fontSize: 10, color: '#666' },
-                itemStyle: { areaColor: '#f9f9f9', borderColor: '#ccc', borderWidth: 1 },
-                emphasis: { itemStyle: { areaColor: '#ffe4e1' } },
-                select: {
-                    itemStyle: { areaColor: '#0052d9', borderColor: '#fff', borderWidth: 2 },
-                    label: { color: '#fff', fontWeight: 'bold' }
-                },
-                selectedMode: 'single',
-                data: policyData
-            }]
-        };
-
-        chart.setOption(option);
-
-        chart.on('click', function(params) {
-            const targetName = params.name;
-
-            if (currentSelected === targetName) {
-                // 恢复
-                chart.dispatchAction({ type: 'unSelect', name: targetName });
-                chart.setOption({ series: [{ center: null, zoom: 1.2 }] });
-                document.getElementById('selectedRegion').innerText = "全国总览";
-                document.getElementById('regionData').innerText = "点击各省份查看基层就业政策与选调录取详情";
-                currentSelected = null;
-            } else {
-                currentSelected = targetName;
-                
-                // 更新文字信息
-                const match = policyData.find(p => p.name === targetName);
-                document.getElementById('selectedRegion').innerText = targetName;
-                document.getElementById('regionData').innerHTML = match ? 
-                    `<strong>政策：</strong>${match.policy}<br><strong>详情：</strong>${match.info}` : 
-                    "暂无该地区详细数据，正在持续更新中...";
-
-                // 计算缩放：使用字典中的值，没有则默认取 6
-                const customZoom = zoomConfig[targetName] || 6;
-                const pos = geoCoordMap[targetName];
-
-                chart.setOption({
-                    series: [{
-                        center: pos ? pos : null,
-                        zoom: customZoom,
-                        // 确保动画平滑过渡
-                        transition: ['center', 'zoom']
-                    }]
+            // 2. 统一渲染函数
+            function switchMap(mapName, url, isChina) {
+                fetch(url).then(res => res.json()).then(geoJson => {
+                    echarts.registerMap(mapName, geoJson);
+                    const option = {
+                        tooltip: { trigger: 'item', formatter: '{b}' },
+                        series: [{
+                            name: 'map',
+                            type: 'map',
+                            map: mapName,
+                            roam: true,
+                            zoom: isChina ? 1.2 : 1,
+                            center: null,
+                            label: { show: true, fontSize: 10 },
+                            itemStyle: { areaColor: '#f9f9f9', borderColor: '#ccc' },
+                            emphasis: { itemStyle: { areaColor: '#ffe4e1' } },
+                            select: { itemStyle: { areaColor: '#0052d9' }, label: { color: '#fff' } },
+                            selectedMode: 'single',
+                            data: isChina ? policyData : []
+                        }]
+                    };
+                    chart.setOption(option, true); // 彻底重绘
                 });
             }
-        });
 
-        window.addEventListener('resize', () => chart.resize());
-    })();
-</script>
+            // 初始加载
+            switchMap('china', 'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json', true);
+
+            // 3. 点击逻辑
+            chart.on('click', function (params) {
+                const name = params.name;
+
+                // 情况A：全国地图下点击“上海市” -> 执行下钻
+                if (currentLevel === 'china' && name === '上海市') {
+                    const match = policyData.find(p => p.name === '上海市');
+                    document.getElementById('selectedRegion').innerText = '上海市';
+                    document.getElementById('regionData').innerHTML = `<strong>政策：</strong>${match.policy}<br><strong>详情：</strong>${match.info}`;
+
+                    currentLevel = 'shanghai';
+                    backBtn.style.display = 'block';
+                    switchMap('shanghai', 'https://geo.datav.aliyun.com/areas_v3/bound/310000_full.json', false);
+                    return;
+                }
+
+                // 情况B：全国地图下点击其他省份 -> 缩放定位
+                if (currentLevel === 'china') {
+                    if (currentSelected === name) {
+                        chart.setOption({ series: [{ center: null, zoom: 1.2 }] });
+                        currentSelected = null;
+                        document.getElementById('selectedRegion').innerText = "全国总览";
+                    } else {
+                        currentSelected = name;
+                        const match = policyData.find(p => p.name === name);
+                        document.getElementById('selectedRegion').innerText = name;
+                        document.getElementById('regionData').innerHTML = match ?
+                            `<strong>政策：</strong>${match.policy}<br><strong>详情：</strong>${match.info}` : "数据更新中...";
+
+                        // 定位修复：获取坐标并强制更新
+                        const pos = geoCoordMap[name];
+                        chart.setOption({
+                            series: [{
+                                center: pos ? pos : null,
+                                zoom: zoomConfig[name] || 6,
+                                transition: ['center', 'zoom']
+                            }]
+                        });
+                    }
+                }
+
+                // 情况C：上海地图下点击各区 -> 仅更新文字
+                if (currentLevel === 'shanghai') {
+                    document.getElementById('selectedRegion').innerText = name;
+                    document.getElementById('regionData').innerText = "查看该区基层就业具体公告。";
+                }
+            });
+
+            // 4. 返回按钮
+            backBtn.onclick = function () {
+                currentLevel = 'china';
+                currentSelected = null;
+                backBtn.style.display = 'none';
+                switchMap('china', 'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json', true);
+                document.getElementById('selectedRegion').innerText = "全国总览";
+                document.getElementById('regionData').innerText = "点击各省份查看政策详情";
+            };
+
+            window.addEventListener('resize', () => chart.resize());
+        })();
+    </script>
 </body>
+
 </html>
