@@ -217,7 +217,7 @@
                     policy: '名校优生',
                     info: '测试文本。',
                     text1: '这是一段测试文本',
-                    link: 'https://www.jszzb.gov.cn/'
+                    link: 'https://www.jszzb.gov.cn/tzgg/art/2025/art_311f52a18ad535b3b8642c677450bab1.html'
                 }
                 // 可以在此继续添加上海各区的数据条目，name需匹配区名
             ];
@@ -242,7 +242,7 @@
                 });
             }
 
-            switchMap('china', 'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json', true);
+            switchMap('china', './china.json', true);
 
             chart.on('click', function (params) {
                 const name = params.name;
@@ -295,7 +295,7 @@
                             currentLevel = 'shanghai';
                             backBtn.style.display = 'block';
                             currentSelected = null; // 重置选中状态
-                            switchMap('shanghai', 'https://geo.datav.aliyun.com/areas_v3/bound/310000_full.json', false);
+                            switchMap('shanghai', './shanghai.json', false);
                             document.getElementById('selectedRegion').innerText = "上海市总览";
                             document.getElementById('regionData').innerText = "已进入上海详细地图，请点击各区。";
                         };
@@ -309,7 +309,7 @@
                 currentLevel = 'china';
                 currentSelected = null;
                 backBtn.style.display = 'none';
-                switchMap('china', 'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json', true);
+                switchMap('china', './china.json', true);
                 document.getElementById('selectedRegion').innerText = "全国总览";
                 document.getElementById('regionData').innerText = "请点击省份查看详情";
             };
