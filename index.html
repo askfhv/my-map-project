@@ -88,8 +88,20 @@
 
         #regionData {
             font-size: 1rem;
-            line-height: 1.6;
+            line-height: 1.8;
             color: #333;
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        #regionData::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        #regionData::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 10px;
         }
 
         #back-btn {
@@ -107,13 +119,26 @@
             font-weight: bold;
         }
 
+        /* 引导进入上海按钮 */
+        .enter-sh-btn {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 6px 15px;
+            background: #d6292b;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
         @media (min-width: 768px) {
             .main-header h1 {
                 font-size: 2.2rem;
             }
 
             .info-card {
-                width: 350px;
+                width: 380px;
                 right: auto;
                 bottom: 40px;
                 left: 40px;
@@ -128,7 +153,6 @@
 </head>
 
 <body>
-
     <div class="main-header">
         <h1>上海财经大学基层就业地图</h1>
     </div>
@@ -149,10 +173,10 @@
         (function () {
             const chart = echarts.init(document.getElementById('china-map'));
             const backBtn = document.getElementById('back-btn');
-            let currentLevel = 'china'; // 'china' or 'shanghai'
+            let currentLevel = 'china';
             let currentSelected = null;
 
-            // 1. 坐标配置
+            // 1. 坐标库：包含全国省份 + 上海各区
             const geoCoordMap = {
                 '北京市': [116.40, 39.90], '天津市': [117.19, 39.12], '上海市': [121.47, 31.23], '重庆市': [106.50, 29.53],
                 '河北省': [114.50, 38.04], '山西省': [112.54, 37.85], '辽宁省': [123.42, 41.79], '吉林省': [125.32, 43.88],
@@ -162,41 +186,50 @@
                 '四川省': [104.06, 30.67], '贵州省': [106.71, 26.57], '云南省': [102.71, 25.04], '陕西省': [108.94, 34.26],
                 '甘肃省': [103.82, 36.05], '青海省': [101.77, 36.62], '台湾省': [121.50, 25.04], '内蒙古自治区': [111.67, 40.81],
                 '广西壮族自治区': [108.32, 22.82], '西藏自治区': [91.11, 29.97], '宁夏回族自治区': [106.27, 38.46],
-                '新疆维吾尔自治区': [87.61, 43.79], '香港特别行政区': [114.17, 22.27], '澳门特别行政区': [113.54, 22.19]
+                '新疆维吾尔自治区': [87.61, 43.79], '香港特别行政区': [114.17, 22.27], '澳门特别行政区': [113.54, 22.19],
+                // 上海各区中心坐标
+                '浦东新区': [121.75, 31.15], '杨浦区': [121.52, 31.30], '闵行区': [121.40, 31.08], '徐汇区': [121.44, 31.17],
+                '黄浦区': [121.48, 31.23], '静安区': [121.45, 31.28], '普陀区': [121.40, 31.25], '长宁区': [121.36, 31.21],
+                '虹口区': [121.50, 31.27], '宝山区': [121.40, 31.38], '嘉定区': [121.23, 31.35], '松江区': [121.23, 31.04],
+                '青浦区': [121.12, 31.15], '金山区': [121.30, 30.85], '奉贤区': [121.47, 30.92], '崇明区': [121.60, 31.62]
             };
 
+            // 2. 缩放配置库：全国省份 + 上海各区
             const zoomConfig = {
-                // 巨型区域
-                '新疆维吾尔自治区': 2.2, '西藏自治区': 2.3, '内蒙古自治区': 2.5, '青海省': 3.5,
-                // 大型省份
-                '四川省': 4.5, '黑龙江省': 4.5, '甘肃省': 5, '云南省': 5.5,
-                // 中型省份
-                '广东省': 7, '湖南省': 7, '湖北省': 7, '河南省': 7, '山东省': 7, '江西省': 7,
-                '福建省': 7, '安徽省': 7, '浙江省': 7, '江苏省': 8, '河北省': 7, '山西省': 7,
-                '辽宁省': 7, '吉林省': 7, '广西壮族自治区': 7, '贵州省': 7, '陕西省': 7,
-                // 小型/直辖市
-                '北京市': 12, '天津市': 12, '上海市': 15, '重庆市': 8, '海南省': 10,
-                '宁夏回族自治区': 10, '台湾省': 10, '香港特别行政区': 20, '澳门特别行政区': 25
+                // 全国层级
+                '新疆维吾尔自治区': 2.2, '西藏自治区': 2.3, '内蒙古自治区': 2.5, '上海市': 15, '海南省': 10,
+                // 上海各区层级（针对各区面积大小优化）
+                '浦东新区': 3, '崇明区': 3.5, '金山区': 5, '奉贤区': 5.5, '青浦区': 5.5, '松江区': 5.5,
+                '嘉定区': 6, '宝山区': 6, '闵行区': 6,
+                '杨浦区': 10, '虹口区': 12, '黄浦区': 12, '静安区': 10, '徐汇区': 10, '普陀区': 10, '长宁区': 10
             };
 
             const policyData = [
-                { name: '上海市', policy: '选调生/“三支一扶”', info: '重点面向高水平大学招录，待遇优厚。' },
-                { name: '新疆维吾尔自治区', policy: '西部计划/兵团选调', info: '落户优惠，生活补贴标准高。' }
+                {
+                    name: '上海市',
+                    policy: '选调生/“三支一扶”',
+                    info: '文本文本文本文本。',
+                    time: '见官方公告',
+                    contact: '021-12345678'
+                },
+                {
+                    name: '江苏省',
+                    policy: '名校优生',
+                    info: '测试文本。',
+                    text1: '这是一段测试文本',
+                    link: 'https://www.jszzb.gov.cn/'
+                }
+                // 可以在此继续添加上海各区的数据条目，name需匹配区名
             ];
 
-            // 2. 统一渲染函数
             function switchMap(mapName, url, isChina) {
                 fetch(url).then(res => res.json()).then(geoJson => {
                     echarts.registerMap(mapName, geoJson);
                     const option = {
                         tooltip: { trigger: 'item', formatter: '{b}' },
                         series: [{
-                            name: 'map',
-                            type: 'map',
-                            map: mapName,
-                            roam: true,
-                            zoom: isChina ? 1.2 : 1,
-                            center: null,
+                            name: 'map', type: 'map', map: mapName, roam: true,
+                            zoom: isChina ? 1.2 : 1, center: null,
                             label: { show: true, fontSize: 10 },
                             itemStyle: { areaColor: '#f9f9f9', borderColor: '#ccc' },
                             emphasis: { itemStyle: { areaColor: '#ffe4e1' } },
@@ -205,69 +238,80 @@
                             data: isChina ? policyData : []
                         }]
                     };
-                    chart.setOption(option, true); // 彻底重绘
+                    chart.setOption(option, true);
                 });
             }
 
-            // 初始加载
             switchMap('china', 'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json', true);
 
-            // 3. 点击逻辑
             chart.on('click', function (params) {
                 const name = params.name;
 
-                // 情况A：全国地图下点击“上海市” -> 执行下钻
-                if (currentLevel === 'china' && name === '上海市') {
-                    const match = policyData.find(p => p.name === '上海市');
-                    document.getElementById('selectedRegion').innerText = '上海市';
-                    document.getElementById('regionData').innerHTML = `<strong>政策：</strong>${match.policy}<br><strong>详情：</strong>${match.info}`;
+                if (currentSelected === name) {
+                    chart.setOption({ series: [{ center: null, zoom: currentLevel === 'china' ? 1.2 : 1 }] });
+                    currentSelected = null;
+                    document.getElementById('selectedRegion').innerText = currentLevel === 'china' ? "全国总览" : "上海市总览";
+                    document.getElementById('regionData').innerText = "请点击区域查看详情";
+                } else {
+                    currentSelected = name;
+                    showInfoCard(name);
+                    const pos = geoCoordMap[name];
+                    const zoom = zoomConfig[name] || 6;
 
-                    currentLevel = 'shanghai';
-                    backBtn.style.display = 'block';
-                    switchMap('shanghai', 'https://geo.datav.aliyun.com/areas_v3/bound/310000_full.json', false);
-                    return;
-                }
-
-                // 情况B：全国地图下点击其他省份 -> 缩放定位
-                if (currentLevel === 'china') {
-                    if (currentSelected === name) {
-                        chart.setOption({ series: [{ center: null, zoom: 1.2 }] });
-                        currentSelected = null;
-                        document.getElementById('selectedRegion').innerText = "全国总览";
-                    } else {
-                        currentSelected = name;
-                        const match = policyData.find(p => p.name === name);
-                        document.getElementById('selectedRegion').innerText = name;
-                        document.getElementById('regionData').innerHTML = match ?
-                            `<strong>政策：</strong>${match.policy}<br><strong>详情：</strong>${match.info}` : "数据更新中...";
-
-                        // 定位修复：获取坐标并强制更新
-                        const pos = geoCoordMap[name];
-                        chart.setOption({
-                            series: [{
-                                center: pos ? pos : null,
-                                zoom: zoomConfig[name] || 6,
-                                transition: ['center', 'zoom']
-                            }]
-                        });
-                    }
-                }
-
-                // 情况C：上海地图下点击各区 -> 仅更新文字
-                if (currentLevel === 'shanghai') {
-                    document.getElementById('selectedRegion').innerText = name;
-                    document.getElementById('regionData').innerText = "查看该区基层就业具体公告。";
+                    chart.setOption({
+                        series: [{
+                            center: pos || null,
+                            zoom: zoom,
+                            transition: ['center', 'zoom']
+                        }]
+                    });
                 }
             });
 
-            // 4. 返回按钮
+            function showInfoCard(regionName) {
+                const match = policyData.find(p => p.name === regionName);
+                const titleEl = document.getElementById('selectedRegion');
+                const contentEl = document.getElementById('regionData');
+                titleEl.innerText = regionName;
+
+                if (match) {
+                    let html = `<strong>政策：</strong>${match.policy || '暂无数据'}<br>`;
+                    html += `<strong>详情：</strong>${match.info || '暂无数据'}<br>`;
+                    if (match.time) html += `<strong>时间：</strong>${match.time}<br>`;
+                    if (match.contact) html += `<strong>电话：</strong>${match.contact}<br>`;
+                    if (match.text1) html +=`<strong>测试文本：</strong>${match.text1}<br>`;
+                    if (match.link) {
+                        html += `<strong>链接：</strong><a href="${match.link}" target="_blank" style="color: #d6292b;">点击查看</a>`;
+                    }
+
+                    // 仅在全国地图点击上海时显示进入按钮
+                    if (regionName === '上海市' && currentLevel === 'china') {
+                        html += `<br><div class="enter-sh-btn" id="enterSH">进入上海市详细地图 →</div>`;
+                    }
+                    contentEl.innerHTML = html;
+
+                    if (document.getElementById('enterSH')) {
+                        document.getElementById('enterSH').onclick = function () {
+                            currentLevel = 'shanghai';
+                            backBtn.style.display = 'block';
+                            currentSelected = null; // 重置选中状态
+                            switchMap('shanghai', 'https://geo.datav.aliyun.com/areas_v3/bound/310000_full.json', false);
+                            document.getElementById('selectedRegion').innerText = "上海市总览";
+                            document.getElementById('regionData').innerText = "已进入上海详细地图，请点击各区。";
+                        };
+                    }
+                } else {
+                    contentEl.innerText = "暂无具体数据，正在持续更新中...";
+                }
+            }
+
             backBtn.onclick = function () {
                 currentLevel = 'china';
                 currentSelected = null;
                 backBtn.style.display = 'none';
                 switchMap('china', 'https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json', true);
                 document.getElementById('selectedRegion').innerText = "全国总览";
-                document.getElementById('regionData').innerText = "点击各省份查看政策详情";
+                document.getElementById('regionData').innerText = "请点击省份查看详情";
             };
 
             window.addEventListener('resize', () => chart.resize());
