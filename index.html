@@ -63,6 +63,16 @@
             color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;
         }
 
+        /* --- 新增：定位中心按钮样式 --- */
+        #reset-btn {
+            position: absolute; top: 60px; left: 15px; z-index: 30;
+            padding: 8px 12px; background: #fff; border: 1px solid #ccc;
+            border-radius: 4px; cursor: pointer; font-size: 0.85rem;
+            color: #333; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            font-weight: bold;
+        }
+        #reset-btn:hover { background: #f9f9f9; color: #d6292b; }
+
         .enter-sh-btn {
             display: inline-block;
             margin-top: 10px;
@@ -76,6 +86,7 @@
             .main-header h1 { font-size: 2.2rem; }
             .info-card { width: 380px; right: auto; bottom: 40px; left: 40px; }
             .logo-bar img { height: 60px; }
+            #reset-btn { top: 80px; left: 15px; } /* 电脑端稍微往下移一点，避开Logo */
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
@@ -89,6 +100,8 @@
     <div class="map-container">
         <div id="china-map"></div>
         <button id="back-btn">返回全国视图</button>
+        <button id="reset-btn">🎯 回到地图中心</button>
+        
         <div class="logo-bar">
             <img src="SufeLogo.png" alt="SUFE LOGO" onerror="this.style.display='none'">
         </div>
@@ -102,10 +115,10 @@
         (function () {
             const chart = echarts.init(document.getElementById('china-map'));
             const backBtn = document.getElementById('back-btn');
+            const resetBtn = document.getElementById('reset-btn'); // 获取按钮
             let currentLevel = 'china';
             let currentSelected = null;
 
-            // 港澳台及南海诸岛名单（物理屏蔽名单）
             const forbiddenRegions = ['台湾省', '香港特别行政区', '澳门特别行政区', '南海诸岛'];
 
             const geoCoordMap = {
@@ -162,13 +175,12 @@
                 fetch(url).then(res => res.json()).then(geoJson => {
                     echarts.registerMap(mapName, geoJson);  
                     
-                    // 设置静默样式：在 series.regions 中指定
                     const silentStyles = forbiddenRegions.map(name => ({
                         name: name,
                         itemStyle: { areaColor: '#f2f2f2' },
-                        emphasis: { disabled: true }, // 彻底禁用高亮变色
+                        emphasis: { disabled: true }, 
                         label: { show: false },
-                        select: { disabled: true } // 禁用选中变色
+                        select: { disabled: true } 
                     }));
 
                     const option = {
@@ -181,6 +193,12 @@
                             type: 'map', 
                             map: mapName, 
                             roam: true,
+                            scaleLimit: {
+                                min: isChina ? 1 : 0.8, 
+                                max: 15
+                            },
+                            layoutCenter: ['50%', '50%'], 
+                            layoutSize: '90%', 
                             zoom: isChina ? 1.2 : 1, 
                             center: null,
                             label: { show: true, fontSize: 10 },
@@ -198,13 +216,28 @@
 
             switchMap('china', './china.json', true);
 
-            // 核心修复点：点击事件层级的拦截
+            // --- 新增：定位中心按钮点击事件 ---
+            resetBtn.onclick = function() {
+                // 将地图 center 置空（恢复 layoutCenter 默认值），zoom 恢复初始值
+                chart.setOption({
+                    series: [{
+                        center: null, 
+                        zoom: currentLevel === 'china' ? 1.2 : 1
+                    }]
+                });
+                // 同时重置文字卡片
+                currentSelected = null;
+                document.getElementById('selectedRegion').innerText = currentLevel === 'china' ? "全国总览" : "上海市总览";
+                document.getElementById('regionData').innerText = "请点击区域查看详情";
+                // 取消所有地图选中状态
+                chart.dispatchAction({ type: 'unSelect' });
+            };
+
             chart.on('click', function (params) {
                 const name = params.name;
 
-                // 物理拦截：如果点击的是名单中的区域，直接闪人，什么都不做
                 if (forbiddenRegions.includes(name)) {
-                    chart.dispatchAction({ type: 'unSelect', name: name }); // 强行撤销选中状态
+                    chart.dispatchAction({ type: 'unSelect', name: name }); 
                     return; 
                 }
 
