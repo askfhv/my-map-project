@@ -6,22 +6,71 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>上财基层就业地图</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { height: 100%; width: 100%; overflow: hidden; background: #ffffff; }
-        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; display: flex; flex-direction: column; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-        .main-header { width: 100%; padding: 15px 0; text-align: center; border-bottom: 1px solid #f0f0f0; background: #fff; z-index: 20; }
-        .main-header h1 { color: #d6292b; font-size: 1.5rem; font-weight: bold; }
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            background: #ffffff;
+        }
 
-        .map-container { flex-grow: 1; position: relative; width: 100%; overflow: hidden; }
-        #china-map { width: 100%; height: 100%; }
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
 
-        .logo-bar { position: absolute; top: 10px; left: 15px; z-index: 10; pointer-events: none; }
-        .logo-bar img { height: 40px; opacity: 0.9; }
+        .main-header {
+            width: 100%;
+            padding: 15px 0;
+            text-align: center;
+            border-bottom: 1px solid #f0f0f0;
+            background: #fff;
+            z-index: 20;
+        }
+
+        .main-header h1 {
+            color: #d6292b;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .map-container {
+            flex-grow: 1;
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        #china-map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .logo-bar {
+            position: absolute;
+            top: 10px;
+            left: 15px;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .logo-bar img {
+            height: 40px;
+            opacity: 0.9;
+        }
 
         .info-card {
             position: absolute;
-            bottom: 20px; left: 20px; right: 20px;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
             z-index: 10;
             background: rgba(255, 255, 255, 0.95);
             border-left: 5px solid #d6292b;
@@ -30,7 +79,14 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
         }
 
-        .region-name { font-size: 1.6rem; font-weight: bold; color: #d6292b; margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .region-name {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #d6292b;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
 
         #regionData {
             font-size: 1rem;
@@ -46,47 +102,124 @@
             padding-bottom: 8px;
             border-bottom: 1px dashed #eee;
         }
-        .policy-item:last-child { border-bottom: none; }
-        
-        .policy-title-base { color: #d6292b; font-weight: bold; font-size: 1.05rem; display: inline-block; margin-bottom: 4px; }
-        .policy-link { text-decoration: underline; cursor: pointer; }
-        .policy-text { text-decoration: none; cursor: default; }
-        .policy-desc { font-size: 0.9rem; color: #666; line-height: 1.5; }
-        .policy-require { font-size: 0.85rem; color: #d6292b; margin-top: 5px; background: #fff5f5; padding: 4px 8px; border-radius: 4px; }
 
-        #regionData::-webkit-scrollbar { width: 4px; }
-        #regionData::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+        .policy-item:last-child {
+            border-bottom: none;
+        }
+
+        .policy-title-base {
+            color: #d6292b;
+            font-weight: bold;
+            font-size: 1.05rem;
+            display: inline-block;
+            margin-bottom: 4px;
+        }
+
+        .policy-link {
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .policy-text {
+            text-decoration: none;
+            cursor: default;
+        }
+
+        .policy-desc {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .policy-require {
+            font-size: 0.85rem;
+            color: #d6292b;
+            margin-top: 5px;
+            background: #fff5f5;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        #regionData::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        #regionData::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 10px;
+        }
 
         #back-btn {
-            position: absolute; top: 20px; right: 20px; z-index: 30;
-            display: none; padding: 10px 20px; background: #d6292b;
-            color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 30;
+            display: none;
+            padding: 10px 20px;
+            background: #d6292b;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
         }
 
         /* --- 新增：定位中心按钮样式 --- */
         #reset-btn {
-            position: absolute; top: 60px; left: 15px; z-index: 30;
-            padding: 8px 12px; background: #fff; border: 1px solid #ccc;
-            border-radius: 4px; cursor: pointer; font-size: 0.85rem;
-            color: #333; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            position: absolute;
+            top: 60px;
+            left: 15px;
+            z-index: 30;
+            padding: 8px 12px;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: #333;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
             font-weight: bold;
         }
-        #reset-btn:hover { background: #f9f9f9; color: #d6292b; }
+
+        #reset-btn:hover {
+            background: #f9f9f9;
+            color: #d6292b;
+        }
 
         .enter-sh-btn {
             display: inline-block;
             margin-top: 10px;
             padding: 6px 15px;
-            background: #d6292b; color: white;
-            border-radius: 4px; cursor: pointer;
-            font-size: 0.9rem; font-weight: bold;
+            background: #d6292b;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
         }
 
         @media (min-width: 768px) {
-            .main-header h1 { font-size: 2.2rem; }
-            .info-card { width: 380px; right: auto; bottom: 40px; left: 40px; }
-            .logo-bar img { height: 60px; }
-            #reset-btn { top: 80px; left: 15px; } /* 电脑端稍微往下移一点，避开Logo */
+            .main-header h1 {
+                font-size: 2.2rem;
+            }
+
+            .info-card {
+                width: 380px;
+                right: auto;
+                bottom: 40px;
+                left: 40px;
+            }
+
+            .logo-bar img {
+                height: 60px;
+            }
+
+            #reset-btn {
+                top: 80px;
+                left: 15px;
+            }
+
+            /* 电脑端稍微往下移一点，避开Logo */
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
@@ -101,7 +234,7 @@
         <div id="china-map"></div>
         <button id="back-btn">返回全国视图</button>
         <button id="reset-btn">回到地图中心</button>
-        
+
         <div class="logo-bar">
             <img src="SufeLogo.png" alt="SUFE LOGO" onerror="this.style.display='none'">
         </div>
@@ -161,45 +294,208 @@
                 {
                     name: '江苏省',
                     policies: [
-                        { title: '名校优选', desc: '每年十月中旬开展，要求较高，对我校有专业限制', url: 'https://www.jszzb.gov.cn/tzgg/art/2025/art_311f52a18ad535b3b8642c677450bab1.html',require:'中共党员（含预备），学生干部，综合性表彰需全满足' },
-                        { title: '常规选调(乡镇)', desc: '每年十月中旬开展，要求较名校优选相比较低，对我校无专业限制', url: 'https://www.jszzb.gov.cn/tzgg/art/2025/art_311f52a18ad535b3b8642c677450bab1.html' ,require:'中共党员（含预备），学生干部，综合性表彰需全满足，但要求降低'},
-                        { title: '省考(公务员)', desc: '每年十月末开展，部分岗位存在生源地限制', url: 'https://www.jszzb.gov.cn/tzgg/art/2025/art_0b70c8f3fb4f2c5d852180928e946634.html'},
+                        { title: '名校优选', desc: '每年十月中旬开展，要求较高，对我校有专业限制', url: 'https://www.jszzb.gov.cn/tzgg/art/2025/art_311f52a18ad535b3b8642c677450bab1.html', require: '中共党员（含预备），学生干部，综合性表彰需全满足' },
+                        { title: '常规选调(乡镇)', desc: '每年十月中旬开展，要求较名校优选相比较低，对我校无专业限制', url: 'https://www.jszzb.gov.cn/tzgg/art/2025/art_311f52a18ad535b3b8642c677450bab1.html', require: '中共党员（含预备），学生干部，综合性表彰需全满足，但要求降低' },
+                        { title: '省考(公务员)', desc: '每年十月末开展，部分岗位存在生源地限制', url: 'https://www.jszzb.gov.cn/tzgg/art/2025/art_0b70c8f3fb4f2c5d852180928e946634.html' },
                         { title: '御风解读', desc: '解析江苏省选调近几年的报考条件及相关政策', url: 'https://mp.weixin.qq.com/s/6mEbElaF7bjK4xarddlLHQ' },
-                        { title: '补充说明/备注', desc :'11111测试用'},
-                        { title: '测试测试测试', desc :'文本文本文本文本文本',require:'硬性要求硬性要求硬性要求yxyq'}
+                        { title: '补充说明/备注', desc: '11111测试用' },
+                        { title: '测试测试测试', desc: '文本文本文本文本文本', require: '硬性要求硬性要求硬性要求yxyq' }
+                    ]
+                },
+                {
+                    name: '河北省',
+                    policies: [
+                        { title: '定向选调', desc: '岗位限制财经类专业', url: 'https://www.hebpta.com.cn/article?artId=13039' },
+                        { title: '御风解读', desc: '解析河北省选调近几年的报考条件及相关政策', url: 'https://mp.weixin.qq.com/s/H5ugyV0UIUXPWe1Y74PFAw' }
+                    ]
+                },
+                {
+                    name: '山西省',
+                    policies: [
+                        { title: '定向选调', desc: '岗位限制应用经济学专业', url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/142351478252769280', require: '中共党员（含预备）' },
+                        { title: '常规选调', desc: '岗位为乡镇机关', url: 'https://rst.shanxi.gov.cn/rsks/gwyks/2026xdsks/202601/t20260119_10042602.shtml', require: '中共党员（含预备），院及以上表彰奖励或担任学生干部连续1年以上或参军两个条件同时满足' },
+                        { title: '御风解读', desc: '解析山西省选调近几年的报考条件及相关政策', url: 'https://mp.weixin.qq.com/s/BcrMFIkZu59fv-498DkWrw' }
+                    ]
+                },
+                {
+                    name: '辽宁省',
+                    policies: [
+                        { title: '定向选调', desc: '岗位包括沈阳&大连县直机关、其他市市直单位&县直机关、乡镇（街道）', url: 'https://mp.weixin.qq.com/s/7VZ5Xc8SUa1YOsxTK2peFw', require: '中共党员（含预备）+学业前50%+干部 / 校级及以上奖励 / 参军之一' },
+                        { title: '御风解读', desc: '辽宁省近三年面向上海财经大学选调政策详解', url: 'https://mp.weixin.qq.com/s/U2dsTivaRmTCUBxrNqkbvg' }
+                    ]
+                },
+                {
+                    name: '吉林省',
+                    policies: [
+                        { title: '定向选调（长春市）', desc: '长春市直部门（不含辖区分局）职位要求本科阶段为“双一流”建设高校', url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/113352320124850176', require: '中共党员（含预备），干部，荣誉称号以及校级以上奖学金，参军四项之一' },
+                        { title: '御风解读', desc: '吉林省近三年面向上海财经大学选调政策详解', url: 'https://mp.weixin.qq.com/s/X5C-uMIX4xw5z0Xera0LDQ' }
+                    ]
+                },
+                {
+                    name: '黑龙江省',
+                    policies: [
+                        { title: '定向选调', desc: '干部经历年限要求为连续半年', url: 'https://mp.weixin.qq.com/s/7E65q2LvDKf_HQDuanbHnA', require: '党中共党员（含预备），干部（连续半年），校级及以上奖励，参军四项之一' },
+                        { title: '御风解读', desc: '黑龙江省近三年面向上海财经大学选调政策详解', url: 'https://mp.weixin.qq.com/s/306-6emzxZWvApULwPTZIg' }
+                    ]
+                },
+                {
+                    name: '福建省',
+                    policies: [
+                        { title: '定向选调', desc: '本科、硕士限福建生源；博士不限，双向选择；法检类岗位要求第一专业须为法学类', url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/133678599759859712', require: '学生干部' },
+                        { title: '御风解读', desc: '福建省近三年面向上海财经大学定向选调招录政策详解', url: 'https://mp.weixin.qq.com/s/vbLXh-5Y_jWVl63R-uxn2w' }
+                    ]
+                },
+                {
+                    name: '江西省',
+                    policies: [
+                        { title: '定向选调', desc: '选调单位为省直、市直机关，限应用经济学学科', url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/142351478252769280', require: '需满足：中共党员（含预备）；满足干部、校级及以上奖励（团体奖励除外）、参军经历者优先' },
+                        { title: '御风解读', desc: '山西省近三年面向上海财经大学选调政策详解', url: 'https://mp.weixin.qq.com/s/BcrMFIkZu59fv-498DkWrw' }
+                    ]
+                },
+                {
+                    name: '山东省',
+                    policies: [
+                        { title: '定向选调', desc: '选调政策基本稳定，招录流程节奏平稳，计划名额略有增加', url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/128212439417360384', require: '中共党员（含预备）、主要学生干部、获得校级以上（含校级）综合性荣誉称号者优先' },
+                        { title: '御风解读', desc: '山东省近三年面向上海财经大学选调政策详解', url: 'https://mp.weixin.qq.com/s/ifL3ur4c8wrbP6KOAOz16A' }
+                    ]
+                },
+                {
+                    name: '河南省',
+                    policies: [
+                        { title: '常规选调', desc: '法检专项：法学。报考法院系统需通过国家统一法律职业资格考试，成绩达到A类证书标准', url: 'http://xds.jyt.henan.gov.cn/front/newsDetail?newsId=09fe98e4-77af-410a-bc83-5ee14c8d', require: '党中共党员（含预备），干部，校级及以上奖励，参军四项之一' }
+                    ]
+                },
+                {
+                    name: '湖北省',
+                    policies: [
+                        { title: '定向选调', desc: '岗位为县级机关', url: 'https://rst.hubei.gov.cn/hbrsksw/zlplks/jglyks/hbsxtsks/zkgg/202511/t20251112_5810864.shtml', require: '中共党员（含预备），干部，校级及以上奖励三项之一' },
+                        { title: '常规选调', desc: '一小段描述性文本', url: 'https://rst.hubei.gov.cn/hbrsksw/zlplks/jglyks/hbsxtsks/zkgg/202601/t20260112_5853031.shtml', require: '中共党员（含预备），干部，校级及以上奖励三项之一' },
+                        { title: '御风解读', desc: '解析湖北省选调近几年的报考条件及相关政策', url: 'https://mp.weixin.qq.com/s/lseUJgv7NxzV-sPiwLqTFA' }
+                    ]
+                },
+                {
+                    name: '广东省',
+                    policies: [
+                        { title: '定向选调', desc: '以最高学历报考，岗位限制应用经济学专业', url: 'https://www.gdzz.gov.cn/tzgg/content/post_24297.html', require: '中共党员（含预备）、干部、校级及以上奖励、参军四项之一且GPA前50%' },
+                        { title: '御风解读', desc: '解析广东省选调近几年的报考条件及相关政策', url: 'https://mp.weixin.qq.com/s/Vyvz1hiSm4lcDvyWg-gz4w' }
+                    ]
+                },
+                {
+                    name: '海南省',
+                    policies: [
+                        { title: '定向选调', desc: '岗位为省级以下', url: 'https://www.nanhaixf.gov.cn/articles/59/48943.htm', require: '硬性要求' }
+                    ]
+                },
+                {
+                    name: '四川省',
+                    policies: [
+                        { title: '常规选调', desc: '本科和研究生有不同专业限制，但满足①省级“优秀青年马克思主义者培养工程”培养对象；②校级及以上荣誉称号；③干部（一年）以上；④报考阿坝州、甘孜州、凉山州四个条件报考不限专业', url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/110493291119775744', require: '中共党员（含预备），干部，国家级奖学金，校级及以上“优秀青年马克思主义者培养工程”培养对象、院系级及以上荣誉称号、参军六项之一' },
+                        { title: '御风解读', desc: '四川省近三年选调招录政策详解', url: 'https://mp.weixin.qq.com/s/Ov2Zd6icYshgd87J0Mxv4w' }
+                    ]
+                },
+                {
+                    name: '贵州省',
+                    policies: [
+                        { title: '定向选调', desc: '党政机关职位专业限制：财经方向、法学方向、信息技术方向、文史哲方向。省属企事业单位职位专业设置为学科门类、具体专业或不限专业。', url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/118422202369576960', require: '本科毕业生：中共党员（含预备），干部，校级以上奖学金，院系级以上表彰、参军五项之一' },
+                        { title: '御风解读', desc: '贵州省近三年面向上海财经大学选调政策详解', url: 'https://mp.weixin.qq.com/s/jrL_AoFI-7X3dTxz8R-czw' }
+                    ]
+                },
+                {
+                    name: '云南省',
+                    policies: [
+                        { title: '定向选调', desc: '正常可以报考B类、C类、D类职位，博士研究生还可选择A类职位报考', url: 'https://mp.weixin.qq.com/s/g6UDst8CvdJcplsOZxOUOw', require: '中共党员（含预备）、要求取得国家法律职业资格证书于2026年9月30日前取得证书等' },
+                        { title: '御风解读', desc: '云南省近三年面向上海财经大学选调政策详解', url: 'https://mp.weixin.qq.com/s/OHiav11IBDbKCiXojNnm0Q' }
+                    ]
+                },
+                {
+                    name: '甘肃省',
+                    policies: [
+                        { title: '常规选调', desc: '一小段描述性文本', url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/109014812394131456'},
+                        { title: '政法专项选调', desc: '岗位限制法学专业', url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/109014812394131456' }
+                    ]
+                },
+                {
+                    name: '青海省',
+                    policies: [
+                        { title: '定向选调', desc: '一小段描述性文本', url: 'https://www.qhsdj.gov.cn/cmsx/p894/tzgg/37892.html', require: '中共党员（含预备），干部，校级及以上奖励（团体奖励除外），参军四项之一' },
+                        { title: '常规非专项选调', desc: '岗位为县乡机关', url: 'https://www.qhsdj.gov.cn/cmsx/p894/tzgg/37892.html', require: '中共党员（含预备），干部，校级及以上奖励（团体奖励除外），参军四项之一' },
+                        { title: '御风解读', desc: '解析青海省选调近几年的报考条件及相关政策', url: 'https://mp.weixin.qq.com/s/NnG3QYl54Nr4nxOExlbU2w' }
+                    ]
+                },
+                {
+                    name: '内蒙古自治区',
+                    policies: [
+                        { title: '常规选调', desc: '岗位为苏木乡镇岗', url: 'http://www.impta.com.cn/xuandiaosheng/2026121112113.asp', require: '中共党员（含预备），干部且校级及以上奖励，参军三项之一' },
+                        { title: '政法专项选调', desc: '法检专项：法学。报考法院系统需通过国家统一法律职业资格考试，成绩达到A类证书标准', url: 'http://www.impta.com.cn/xuandiaosheng/2025116172330.asp' },
+                        { title: '御风解读', desc: '解析内蒙古自治区选调近几年的报考条件及相关政策', url: 'https://mp.weixin.qq.com/s/OyyvXxTMEoBgZGQ08-mFjw' }
+                    ]
+                },
+                {
+                    name: '广西壮族自治区',
+                    policies: [
+                        { title: '定向选调', desc: '岗位限制经济、财政、金融、会计、财务、投资、保险、统计、法学专业', url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/123885965407293440', require: '中共党员（含预备），干部或校级以上荣誉，参军三项之一；法学专业在报到时须获得国家法律职业资格证书（A证），志愿到县乡基层工作的除外' },
+                        { title: '常规选调', url: 'https://www.gxpta.com.cn/ksxm/gwyzlks/gx2026ndkslygwyxdszt/2026nxdsgg/t13231.html', require: '中共党员（含预备），共青团员且干部或院级以上荣誉或校级以上奖学金，参军，校级以上“青年马克思主义者培养工程”学员四项之一' },
+                        { title: '御风解读', desc: '解析广西壮族自治区选调近几年的报考条件及相关政策', url: 'https://mp.weixin.qq.com/s/9547WUGbZe2m7IbBsfi5KA' }
+                    ]
+                },
+                {
+                    name: '宁夏回族自治区',
+                    policies: [
+                        { title: '定向选调', desc: '岗位限制应用经济学专业', url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/122466933659537408' }
+                    ]
+                },
+                {
+                    name: '新疆维吾尔自治区',
+                    policies: [
+                        { title: '定向选调', desc: '岗位限制区级硕士及以上学历，地及以下不限学历，以最高学历报考。应用经济学可报所有岗位，其他可报地县岗位。报考法官助理、检察官助理以及行政机关中行政处罚决定审核、行政复议、行政裁决、法律顾问等职位的，应当取得相应法律职业资格证书', url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/121301989484269568' },
+                        { title: '御风解读', desc: '解析新疆维吾尔自治区选调近几年的报考条件及相关政策', url: 'https://mp.weixin.qq.com/s/-92mrEFjVMg64f9LG5M2ow' }
+                    ]
+                },
+                {
+                    name: '上海市',
+                    policies: [
+                        { title: '定向选调', desc: '分综合管理（不限专业）、政法、信息技术、财经、城市建设、卫生健康六大方向，后五类需相应专业', url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/105691313877422080', require: '需满足：1.中共党员（含预备）或学生干部  2.获得荣誉称号或奖学金' },
+                        { title: '御风解读', desc: '上海市近三年选调政策详解', url: 'https://mp.weixin.qq.com/s/0eIuYQs2KlLVkLdkUV6Eyw' }
+                    ]
+                },
+                {
+                    name: '重庆市',
+                    policies: [
+                        { title: '定向选调', desc: '专业：①大数据、智能化、装备制造等相关专业；②经济金融及现代管理等相关专业；符合以下条件之一可不限专业：①省级以上荣誉称号；②国家奖学金或国家励志奖学金；③省级以上青年马克思主义者培养工程培养对象；④干部一学年以上；⑤志愿分配到重庆市11个艰苦边远区县。', url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/112840584951107584', require: '中共党员（含预备），院系以上优秀学生干部或副班长以上学生干部，校级以上奖励，参军四项之一' },
+                        { title: '御风解读', desc: '重庆市近三年面向上海财经大学定向选调政策详解', url: 'https://mp.weixin.qq.com/s/Bs5PvGA7KHZUIo1eqjjz0g' },
                     ]
                 }
             ];
 
             function switchMap(mapName, url, isChina) {
                 fetch(url).then(res => res.json()).then(geoJson => {
-                    echarts.registerMap(mapName, geoJson);  
-                    
+                    echarts.registerMap(mapName, geoJson);
+
                     const silentStyles = forbiddenRegions.map(name => ({
                         name: name,
                         itemStyle: { areaColor: '#f2f2f2' },
-                        emphasis: { disabled: true }, 
+                        emphasis: { disabled: true },
                         label: { show: false },
-                        select: { disabled: true } 
+                        select: { disabled: true }
                     }));
 
                     const option = {
-                        tooltip: { 
-                            trigger: 'item', 
-                            formatter: (params) => forbiddenRegions.includes(params.name) ? null : params.name 
+                        tooltip: {
+                            trigger: 'item',
+                            formatter: (params) => forbiddenRegions.includes(params.name) ? null : params.name
                         },
                         series: [{
-                            name: 'map', 
-                            type: 'map', 
-                            map: mapName, 
+                            name: 'map',
+                            type: 'map',
+                            map: mapName,
                             roam: true,
                             scaleLimit: {
-                                min: isChina ? 1 : 0.8, 
+                                min: isChina ? 1 : 0.8,
                                 max: 15
                             },
-                            layoutCenter: ['50%', '50%'], 
-                            layoutSize: '90%', 
-                            zoom: isChina ? 1.2 : 1, 
+                            layoutCenter: ['50%', '50%'],
+                            layoutSize: '90%',
+                            zoom: isChina ? 1.2 : 1,
                             center: null,
                             label: { show: true, fontSize: 10 },
                             itemStyle: { areaColor: '#f9f9f9', borderColor: '#ccc' },
@@ -217,11 +513,11 @@
             switchMap('china', './china.json', true);
 
             // --- 新增：定位中心按钮点击事件 ---
-            resetBtn.onclick = function() {
+            resetBtn.onclick = function () {
                 // 将地图 center 置空（恢复 layoutCenter 默认值），zoom 恢复初始值
                 chart.setOption({
                     series: [{
-                        center: null, 
+                        center: null,
                         zoom: currentLevel === 'china' ? 1.2 : 1
                     }]
                 });
@@ -237,8 +533,8 @@
                 const name = params.name;
 
                 if (forbiddenRegions.includes(name)) {
-                    chart.dispatchAction({ type: 'unSelect', name: name }); 
-                    return; 
+                    chart.dispatchAction({ type: 'unSelect', name: name });
+                    return;
                 }
 
                 if (currentSelected === name) {
@@ -274,10 +570,10 @@
                             const hasUrl = item.url && item.url !== '#';
                             html += `
                                 <div class="policy-item">
-                                    ${hasUrl ? 
-                                        `<a href="${item.url}" target="_blank" class="policy-title-base policy-link">${item.title}</a>` : 
-                                        `<div class="policy-title-base policy-text">${item.title}</div>`
-                                    }
+                                    ${hasUrl ?
+                                    `<a href="${item.url}" target="_blank" class="policy-title-base policy-link">${item.title}</a>` :
+                                    `<div class="policy-title-base policy-text">${item.title}</div>`
+                                }
                                     <div class="policy-desc">${item.desc}</div>
                                     ${item.require ? `<div class="policy-require"><strong>硬性要求：</strong>${item.require}</div>` : ''}
                                 </div>
@@ -320,4 +616,5 @@
         })();
     </script>
 </body>
+
 </html>
