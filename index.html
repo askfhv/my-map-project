@@ -6,221 +6,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>上财基层就业地图</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html,
-        body {
-            height: 100%;
-            width: 100%;
-            overflow: hidden;
-            background: #ffffff;
-        }
-
-        body {
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .main-header {
-            width: 100%;
-            padding: 15px 0;
-            text-align: center;
-            border-bottom: 1px solid #f0f0f0;
-            background: #fff;
-            z-index: 20;
-        }
-
-        .main-header h1 {
-            color: #d6292b;
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-
-        .map-container {
-            flex-grow: 1;
-            position: relative;
-            width: 100%;
-            overflow: hidden;
-        }
-
-        #china-map {
-            width: 100%;
-            height: 100%;
-        }
-
-        .logo-bar {
-            position: absolute;
-            top: 10px;
-            left: 15px;
-            z-index: 10;
-            pointer-events: none;
-        }
-
-        .logo-bar img {
-            height: 40px;
-            opacity: 0.9;
-        }
-
-        .info-card {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
-            z-index: 10;
-            background: rgba(255, 255, 255, 0.95);
-            border-left: 5px solid #d6292b;
-            padding: 20px;
-            border-radius: 4px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-        }
-
-        .region-name {
-            font-size: 1.6rem;
-            font-weight: bold;
-            color: #d6292b;
-            margin-bottom: 8px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 5px;
-        }
-
-        #regionData {
-            font-size: 1rem;
-            line-height: 1.8;
-            color: #333;
-            max-height: 280px;
-            overflow-y: auto;
-            padding-right: 5px;
-        }
-
-        .policy-item {
-            margin-bottom: 12px;
-            padding-bottom: 8px;
-            border-bottom: 1px dashed #eee;
-        }
-
-        .policy-item:last-child {
-            border-bottom: none;
-        }
-
-        .policy-title-base {
-            color: #d6292b;
-            font-weight: bold;
-            font-size: 1.05rem;
-            display: inline-block;
-            margin-bottom: 4px;
-        }
-
-        .policy-link {
-            text-decoration: underline;
-            cursor: pointer;
-        }
-
-        .policy-text {
-            text-decoration: none;
-            cursor: default;
-        }
-
-        .policy-desc {
-            font-size: 0.9rem;
-            color: #666;
-            line-height: 1.5;
-        }
-
-        .policy-require {
-            font-size: 0.85rem;
-            color: #d6292b;
-            margin-top: 5px;
-            background: #fff5f5;
-            padding: 4px 8px;
-            border-radius: 4px;
-        }
-
-        #regionData::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        #regionData::-webkit-scrollbar-thumb {
-            background: #ccc;
-            border-radius: 10px;
-        }
-
-        #back-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 30;
-            display: none;
-            padding: 10px 20px;
-            background: #d6292b;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        /* --- 新增：定位中心按钮样式 --- */
-        #reset-btn {
-            position: absolute;
-            top: 60px;
-            left: 15px;
-            z-index: 30;
-            padding: 8px 12px;
-            background: #fff;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            color: #333;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-            font-weight: bold;
-        }
-
-        #reset-btn:hover {
-            background: #f9f9f9;
-            color: #d6292b;
-        }
-
-        .enter-sh-btn {
-            display: inline-block;
-            margin-top: 10px;
-            padding: 6px 15px;
-            background: #d6292b;
-            color: white;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: bold;
-        }
-
-        @media (min-width: 768px) {
-            .main-header h1 {
-                font-size: 2.2rem;
-            }
-
-            .info-card {
-                width: 380px;
-                right: auto;
-                bottom: 40px;
-                left: 40px;
-            }
-
-            .logo-bar img {
-                height: 60px;
-            }
-
-            #reset-btn {
-                top: 80px;
-                left: 15px;
-            }
-
-            /* 电脑端稍微往下移一点，避开Logo */
-        }
+        /* 样式部分保持不变 */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; width: 100%; overflow: hidden; background: #ffffff; }
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; display: flex; flex-direction: column; }
+        .main-header { width: 100%; padding: 15px 0; text-align: center; border-bottom: 1px solid #f0f0f0; background: #fff; z-index: 20; }
+        .main-header h1 { color: #d6292b; font-size: 1.5rem; font-weight: bold; }
+        .map-container { flex-grow: 1; position: relative; width: 100%; overflow: hidden; }
+        #china-map { width: 100%; height: 100%; }
+        .logo-bar { position: absolute; top: 10px; left: 15px; z-index: 10; pointer-events: none; }
+        .logo-bar img { height: 40px; opacity: 0.9; }
+        .info-card { position: absolute; bottom: 20px; left: 20px; right: 20px; z-index: 10; background: rgba(255, 255, 255, 0.95); border-left: 5px solid #d6292b; padding: 20px; border-radius: 4px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15); }
+        .region-name { font-size: 1.6rem; font-weight: bold; color: #d6292b; margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        #regionData { font-size: 1rem; line-height: 1.8; color: #333; max-height: 280px; overflow-y: auto; padding-right: 5px; }
+        .policy-item { margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px dashed #eee; }
+        .policy-item:last-child { border-bottom: none; }
+        .policy-title-base { color: #d6292b; font-weight: bold; font-size: 1.05rem; display: inline-block; margin-bottom: 4px; }
+        .policy-link { text-decoration: underline; cursor: pointer; }
+        .policy-text { text-decoration: none; cursor: default; }
+        .policy-desc { font-size: 0.9rem; color: #666; line-height: 1.5; }
+        .policy-require { font-size: 0.85rem; color: #d6292b; margin-top: 5px; background: #fff5f5; padding: 4px 8px; border-radius: 4px; }
+        #regionData::-webkit-scrollbar { width: 4px; }
+        #regionData::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+        #back-btn { position: absolute; top: 20px; right: 20px; z-index: 30; display: none; padding: 10px 20px; background: #d6292b; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        #reset-btn { position: absolute; top: 60px; left: 15px; z-index: 30; padding: 8px 12px; background: #fff; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; font-size: 0.85rem; color: #333; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); font-weight: bold; }
+        #reset-btn:hover { background: #f9f9f9; color: #d6292b; }
+        .enter-sh-btn { display: inline-block; margin-top: 10px; padding: 6px 15px; background: #d6292b; color: white; border-radius: 4px; cursor: pointer; font-size: 0.9rem; font-weight: bold; }
+        @media (min-width: 768px) { .main-header h1 { font-size: 2.2rem; } .info-card { width: 380px; right: auto; bottom: 40px; left: 40px; } .logo-bar img { height: 60px; } #reset-btn { top: 80px; left: 15px; } }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 </head>
@@ -248,13 +60,13 @@
         (function () {
             const chart = echarts.init(document.getElementById('china-map'));
             const backBtn = document.getElementById('back-btn');
-            const resetBtn = document.getElementById('reset-btn'); // 获取按钮
+            const resetBtn = document.getElementById('reset-btn');
             let currentLevel = 'china';
             let currentSelected = null;
 
             const forbiddenRegions = ['台湾省', '香港特别行政区', '澳门特别行政区', '南海诸岛'];
 
-            const geoCoordMap = {
+                        const geoCoordMap = {
                 '北京市': [116.40, 39.90], '天津市': [117.19, 39.12], '上海市': [121.47, 31.23], '重庆市': [106.50, 29.53],
                 '河北省': [114.50, 38.04], '山西省': [112.54, 37.85], '辽宁省': [123.42, 41.79], '吉林省': [125.32, 43.88],
                 '黑龙江省': [126.64, 45.75], '江苏省': [118.76, 32.04], '浙江省': [120.15, 30.28], '安徽省': [117.28, 31.86],
@@ -297,9 +109,7 @@
                         { title: '名校优选', desc: '每年十月中旬开展，要求较高，对我校有专业限制', url: 'https://www.jszzb.gov.cn/tzgg/art/2025/art_311f52a18ad535b3b8642c677450bab1.html', require: '中共党员（含预备），学生干部，综合性表彰需全满足' },
                         { title: '常规选调(乡镇)', desc: '每年十月中旬开展，要求较名校优选相比较低，对我校无专业限制', url: 'https://www.jszzb.gov.cn/tzgg/art/2025/art_311f52a18ad535b3b8642c677450bab1.html', require: '中共党员（含预备），学生干部，综合性表彰需全满足，但要求降低' },
                         { title: '省考(公务员)', desc: '每年十月末开展，部分岗位存在生源地限制', url: 'https://www.jszzb.gov.cn/tzgg/art/2025/art_0b70c8f3fb4f2c5d852180928e946634.html' },
-                        { title: '御风解读', desc: '解析江苏省选调近几年的报考条件及相关政策', url: 'https://mp.weixin.qq.com/s/6mEbElaF7bjK4xarddlLHQ' },
-                        { title: '补充说明/备注', desc: '11111测试用' },
-                        { title: '测试测试测试', desc: '文本文本文本文本', require: '硬性要求硬性要求硬性要求yxyq' }
+                        { title: '御风解读', desc: '解析江苏省选调近几年的报考条件及相关政策', url: 'https://mp.weixin.qq.com/s/6mEbElaF7bjK4xarddlLHQ' }
                     ]
                 },
                 {
@@ -369,7 +179,7 @@
                     name: '湖北省',
                     policies: [
                         { title: '定向选调', desc: '岗位为县级机关', url: 'https://rst.hubei.gov.cn/hbrsksw/zlplks/jglyks/hbsxtsks/zkgg/202511/t20251112_5810864.shtml', require: '中共党员（含预备），干部，校级及以上奖励三项之一' },
-                        { title: '常规选调',desc:'描述文本',url: 'https://rst.hubei.gov.cn/hbrsksw/zlplks/jglyks/hbsxtsks/zkgg/202601/t20260112_5853031.shtml', require: '中共党员（含预备），干部，校级及以上奖励三项之一' },
+                        { title: '常规选调',desc:'每年一月初开展',url: 'https://rst.hubei.gov.cn/hbrsksw/zlplks/jglyks/hbsxtsks/zkgg/202601/t20260112_5853031.shtml', require: '中共党员（含预备），干部，校级及以上奖励三项之一' },
                         { title: '御风解读', desc: '解析湖北省选调近几年的报考条件及相关政策', url: 'https://mp.weixin.qq.com/s/lseUJgv7NxzV-sPiwLqTFA' }
                     ]
                 },
@@ -410,14 +220,14 @@
                 {
                     name: '甘肃省',
                     policies: [
-                        { title: '常规选调',  desc:'描述文本',url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/109014812394131456'},
+                        { title: '常规选调',  desc:'每年九月中下旬开展',url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/109014812394131456'},
                         { title: '政法专项选调', desc: '岗位限制法学专业', url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/109014812394131456' }
                     ]
                 },
                 {
                     name: '青海省',
                     policies: [
-                        { title: '定向选调', url: 'https://www.qhsdj.gov.cn/cmsx/p894/tzgg/37892.html', require: '中共党员（含预备），干部，校级及以上奖励（团体奖励除外），参军四项之一' },
+                        { title: '定向选调', desc:'每年十月末开展',url: 'https://www.qhsdj.gov.cn/cmsx/p894/tzgg/37892.html', require: '中共党员（含预备），干部，校级及以上奖励（团体奖励除外），参军四项之一' },
                         { title: '常规非专项选调', desc: '岗位为县乡机关', url: 'https://www.qhsdj.gov.cn/cmsx/p894/tzgg/37892.html', require: '中共党员（含预备），干部，校级及以上奖励（团体奖励除外），参军四项之一' },
                         { title: '御风解读', desc: '解析青海省选调近几年的报考条件及相关政策', url: 'https://mp.weixin.qq.com/s/NnG3QYl54Nr4nxOExlbU2w' }
                     ]
@@ -470,7 +280,6 @@
             function switchMap(mapName, url, isChina) {
                 fetch(url).then(res => res.json()).then(geoJson => {
                     echarts.registerMap(mapName, geoJson);
-
                     const silentStyles = forbiddenRegions.map(name => ({
                         name: name,
                         itemStyle: { areaColor: '#f2f2f2' },
@@ -480,23 +289,12 @@
                     }));
 
                     const option = {
-                        tooltip: {
-                            trigger: 'item',
-                            formatter: (params) => forbiddenRegions.includes(params.name) ? null : params.name
-                        },
+                        tooltip: { trigger: 'item', formatter: (params) => forbiddenRegions.includes(params.name) ? null : params.name },
                         series: [{
-                            name: 'map',
-                            type: 'map',
-                            map: mapName,
-                            roam: true,
-                            scaleLimit: {
-                                min: isChina ? 1 : 0.8,
-                                max: 15
-                            },
-                            layoutCenter: ['50%', '50%'],
-                            layoutSize: '90%',
-                            zoom: isChina ? 1.2 : 1,
-                            center: null,
+                            name: 'map', type: 'map', map: mapName, roam: true,
+                            scaleLimit: { min: isChina ? 1 : 0.8, max: 15 },
+                            layoutCenter: ['50%', '50%'], layoutSize: '90%',
+                            zoom: isChina ? 1.2 : 1, center: null,
                             label: { show: true, fontSize: 10 },
                             itemStyle: { areaColor: '#f9f9f9', borderColor: '#ccc' },
                             emphasis: { itemStyle: { areaColor: '#ffe4e1' } },
@@ -512,31 +310,20 @@
 
             switchMap('china', './china.json', true);
 
-            // --- 新增：定位中心按钮点击事件 ---
             resetBtn.onclick = function () {
-                // 将地图 center 置空（恢复 layoutCenter 默认值），zoom 恢复初始值
-                chart.setOption({
-                    series: [{
-                        center: null,
-                        zoom: currentLevel === 'china' ? 1.2 : 1
-                    }]
-                });
-                // 同时重置文字卡片
+                chart.setOption({ series: [{ center: null, zoom: currentLevel === 'china' ? 1.2 : 1 }] });
                 currentSelected = null;
                 document.getElementById('selectedRegion').innerText = currentLevel === 'china' ? "全国总览" : "上海市总览";
                 document.getElementById('regionData').innerText = "请点击区域查看详情";
-                // 取消所有地图选中状态
                 chart.dispatchAction({ type: 'unSelect' });
             };
 
             chart.on('click', function (params) {
                 const name = params.name;
-
                 if (forbiddenRegions.includes(name)) {
                     chart.dispatchAction({ type: 'unSelect', name: name });
-                    return;
+                    return; 
                 }
-
                 if (currentSelected === name) {
                     chart.setOption({ series: [{ center: null, zoom: currentLevel === 'china' ? 1.2 : 1 }] });
                     currentSelected = null;
@@ -548,11 +335,7 @@
                     const pos = geoCoordMap[name];
                     const zoom = zoomConfig[name] || 6;
                     chart.setOption({
-                        series: [{
-                            center: pos || null,
-                            zoom: zoom,
-                            transition: ['center', 'zoom']
-                        }]
+                        series: [{ center: pos || null, zoom: zoom, transition: ['center', 'zoom'] }]
                     });
                 }
             });
@@ -570,10 +353,7 @@
                             const hasUrl = item.url && item.url !== '#';
                             html += `
                                 <div class="policy-item">
-                                    ${hasUrl ?
-                                    `<a href="${item.url}" target="_blank" class="policy-title-base policy-link">${item.title}</a>` :
-                                    `<div class="policy-title-base policy-text">${item.title}</div>`
-                                }
+                                    ${hasUrl ? `<a href="${item.url}" target="_blank" class="policy-title-base policy-link">${item.title}</a>` : `<div class="policy-title-base policy-text">${item.title}</div>`}
                                     <div class="policy-desc">${item.desc}</div>
                                     ${item.require ? `<div class="policy-require"><strong>硬性要求：</strong>${item.require}</div>` : ''}
                                 </div>
@@ -583,11 +363,18 @@
                         html += `<strong>政策：</strong>${match.policy || '暂无数据'}<br><strong>详情：</strong>${match.info || '暂无数据'}<br>`;
                     }
 
+                    // 暂时关闭上海入口逻辑
+                    // 这里注释掉了生成“进入上海市详细地图”按钮的代码
+                    /*
                     if (regionName === '上海市' && currentLevel === 'china') {
                         html += `<br><div class="enter-sh-btn" id="enterSH">进入上海市详细地图 →</div>`;
                     }
+                    */
+
                     contentEl.innerHTML = html;
 
+                    // 这里原本绑定的按钮点击事件也无需执行
+                    /*
                     if (document.getElementById('enterSH')) {
                         document.getElementById('enterSH').onclick = function () {
                             currentLevel = 'shanghai';
@@ -598,6 +385,7 @@
                             document.getElementById('regionData').innerText = "已进入上海详细地图，请点击各区。";
                         };
                     }
+                    */
                 } else {
                     contentEl.innerText = "数据整理中，敬请期待...";
                 }
@@ -616,5 +404,4 @@
         })();
     </script>
 </body>
-
 </html>
