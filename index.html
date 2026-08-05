@@ -418,59 +418,43 @@
                 document.getElementById('regionData').innerText = "请点击省份查看详情";
             };
 
-            // --- 修改：支持双指实时同步、平滑缓慢缩放 ---
+            // --- 修改：彻底移除外部阻尼拦截，让地图随手指滑动实时跟手同步缩放 ---
             const mapDom = document.getElementById('china-map');
-            let initialDist = 0;
-            let initialZoom = 1;
-            let isPinching = false;
+            let lastDist = 0;
 
             mapDom.addEventListener('touchstart', function(e) {
                 if (e.touches.length === 2) {
-                    isPinching = true;
-                    e.stopPropagation();
                     const dx = e.touches[0].clientX - e.touches[1].clientX;
                     const dy = e.touches[0].clientY - e.touches[1].clientY;
-                    initialDist = Math.sqrt(dx * dx + dy * dy);
-                    const opt = chart.getOption();
-                    initialZoom = opt.series[0].zoom || (currentLevel === 'china' ? 1.2 : 1);
-                } else {
-                    isPinching = false;
+                    lastDist = Math.sqrt(dx * dx + dy * dy);
                 }
-            }, { capture: true, passive: false });
+            }, { passive: true });
 
             mapDom.addEventListener('touchmove', function(e) {
-                if (isPinching && e.touches.length === 2) {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    
+                if (e.touches.length === 2) {
                     const dx = e.touches[0].clientX - e.touches[1].clientX;
                     const dy = e.touches[0].clientY - e.touches[1].clientY;
                     const currentDist = Math.sqrt(dx * dx + dy * dy);
                     
-                    if (initialDist > 0) {
-                        const scale = currentDist / initialDist;
-                        // 阻尼系数：0.25 让双指张开缩放变得非常平缓、跟手
-                        const damping = 0.25; 
-                        const dampenedScale = (scale - 1) * damping + 1;
-                        let newZoom = initialZoom * dampenedScale;
+                    if (lastDist > 0) {
+                        const scale = currentDist / lastDist;
+                        // 稍微平滑一下突变，让双指缩放不再过于狂暴
+                        const smoothScale = 1 + (scale - 1) * 0.4;
+                        const opt = chart.getOption();
+                        let currentZoom = opt.series[0].zoom || (currentLevel === 'china' ? 1.2 : 1);
+                        let newZoom = currentZoom * smoothScale;
                         
                         const minZ = currentLevel === 'china' ? 1 : 0.8;
                         const maxZ = 15;
                         newZoom = Math.max(minZ, Math.min(maxZ, newZoom));
                         
-                        // 实时同步更新地图大小
                         chart.setOption({
                             series: [{ zoom: newZoom }]
-                        }, { silent: true }); // silent: true 提升高频渲染流畅度
+                        }, { silent: true });
                     }
+                    lastDist = currentDist;
                 }
-            }, { capture: true, passive: false });
-
-            mapDom.addEventListener('touchend', function(e) {
-                if (isPinching && e.touches.length < 2) {
-                    isPinching = false;
-                }
-            }, { capture: true, passive: false });
+            }, { passive: true });
 
             window.addEventListener('resize', () => chart.resize());
         })();
