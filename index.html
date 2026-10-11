@@ -64,6 +64,88 @@
             let currentLevel = 'china';
             let currentSelected = null;
 
+            // Mobile gestures use real finger displacement and distance, without fixed zoom steps.
+            const mapElement = document.getElementById('china-map');
+            const directTouch = window.matchMedia('(pointer: coarse)').matches;
+            let suppressMapClickUntil = 0;
+            if (directTouch) {
+                mapElement.style.touchAction = 'none';
+                let previousTouch = null;
+                let touchMoved = false;
+
+                function touchSnapshot(touches) {
+                    const points = Array.from(touches).slice(0, 2).sort((a, b) => a.identifier - b.identifier);
+                    if (!points.length) return null;
+                    const rect = mapElement.getBoundingClientRect();
+                    const first = points[0], second = points[1] || first;
+                    return {
+                        ids: points.map(point => point.identifier).join(','),
+                        x: (first.clientX + second.clientX) / 2 - rect.left,
+                        y: (first.clientY + second.clientY) / 2 - rect.top,
+                        distance: points.length === 2
+                            ? Math.hypot(first.clientX - second.clientX, first.clientY - second.clientY) : 0
+                    };
+                }
+
+                mapElement.addEventListener('touchstart', event => {
+                    if (event.touches.length === 1) {
+                        touchMoved = false;
+                        suppressMapClickUntil = 0;
+                    } else {
+                        touchMoved = true;
+                        suppressMapClickUntil = Date.now() + 500;
+                        if (event.cancelable) event.preventDefault();
+                    }
+                    previousTouch = touchSnapshot(event.touches);
+                }, { passive: false, capture: true });
+
+                mapElement.addEventListener('touchmove', event => {
+                    const next = touchSnapshot(event.touches);
+                    if (event.cancelable) event.preventDefault();
+                    if (!next || !previousTouch || next.ids !== previousTouch.ids) {
+                        previousTouch = next;
+                        return;
+                    }
+                    const dx = next.x - previousTouch.x;
+                    const dy = next.y - previousTouch.y;
+                    const scale = previousTouch.distance > 0 && next.distance > 0
+                        ? next.distance / previousTouch.distance : 1;
+                    if (dx !== 0 || dy !== 0 || scale !== 1) {
+                        touchMoved = true;
+                        suppressMapClickUntil = Date.now() + 500;
+                        if (dx !== 0 || dy !== 0) {
+                            chart.dispatchAction({ type: 'geoRoam', componentType: 'series', seriesIndex: 0, dx, dy });
+                        }
+                        if (Number.isFinite(scale) && scale > 0 && scale !== 1) {
+                            chart.dispatchAction({
+                                type: 'geoRoam', componentType: 'series', seriesIndex: 0,
+                                zoom: scale, originX: next.x, originY: next.y
+                            });
+                        }
+                    }
+                    previousTouch = next;
+                }, { passive: false, capture: true });
+
+                function finishTouch(event) {
+                    if (touchMoved) {
+                        suppressMapClickUntil = Date.now() + 500;
+                        if (event.cancelable) event.preventDefault();
+                    }
+                    // Rebase when a finger is lifted so the next move cannot jump.
+                    previousTouch = event.type === 'touchcancel' ? null : touchSnapshot(event.touches);
+                    if (!previousTouch) touchMoved = false;
+                }
+                mapElement.addEventListener('touchend', finishTouch, { passive: false, capture: true });
+                mapElement.addEventListener('touchcancel', finishTouch, { passive: false, capture: true });
+                mapElement.addEventListener('click', event => {
+                    if (Date.now() < suppressMapClickUntil) {
+                        event.preventDefault();
+                        event.stopImmediatePropagation();
+                    }
+                }, true);
+            }
+
+
             const forbiddenRegions = ['台湾省', '香港特别行政区', '澳门特别行政区', '南海诸岛'];
 
                         const geoCoordMap = {
@@ -365,7 +447,8 @@
                     const option = {
                         tooltip: { trigger: 'item', formatter: (params) => forbiddenRegions.includes(params.name) ? null : params.name },
                         series: [{
-                            name: 'map', type: 'map', map: mapName, roam: true,
+                            name: 'map', type: 'map', map: mapName, roam: !directTouch,
+                            animation: !directTouch,
                             scaleLimit: { min: isChina ? 1 : 0.8, max: 15 },
                             layoutCenter: ['50%', isChina ? '60%' : '50%'], layoutSize: '90%',
                             zoom: isChina ? 1.2 : 1, center: null,
@@ -397,6 +480,7 @@
             };
 
             chart.on('click', function (params) {
+                if (Date.now() < suppressMapClickUntil) return;
                 const name = params.name;
                 if (forbiddenRegions.includes(name)) {
                     chart.dispatchAction({ type: 'unSelect', name: name });
