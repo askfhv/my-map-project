@@ -64,6 +64,59 @@
 
     <script>
         window.addEventListener('DOMContentLoaded', function () {
+            // ========== 地图状态配置区：日常维护只修改这里 ==========
+            // status: 'published' 已发布；'pending' 未发布/待更新；'excluded' 不在选调高校范围。
+            // deadline: '' 暂不判断截止；'2026-10-31' 当天北京时间23:59:59.999截止；
+            //           '2026-10-31 17:00' 或 '2026-10-31 17:00:00' 精确到北京时间。
+            // 只有 published 且已过 deadline 的省份自动变为灰蓝色。
+            // 灰色名单及截止日期按用户确认配置；本轮日期为2026年，山东截止时间待定。
+            const MAP_STATUS_CONFIG = {
+                colors: {
+                    published: { normal: '#f6dfa0', hover: '#edca73' }, // 浅金：已发布且未截止/未填截止时间
+                    pending:   { normal: '#f9f9f9', hover: '#ffe4e1' }, // 原来的无色
+                    excluded:  { normal: '#c3c3c3', hover: '#aaaaaa' }, // 灰：不在选调高校范围
+                    expired:   { normal: '#b8c5d3', hover: '#98aabd' }  // 暗灰蓝：已发布且已截止
+                },
+                provinces: {
+                    '上海市': { status: 'published', deadline: '2026-09-24' },
+                    '江苏省': { status: 'pending', deadline: '' },
+                    '河北省': { status: 'pending', deadline: '' },
+                    '山西省': { status: 'pending', deadline: '' },
+                    '辽宁省': { status: 'pending', deadline: '' },
+                    '吉林省': { status: 'pending', deadline: '' },
+                    '黑龙江省': { status: 'published', deadline: '2026-10-17' },
+                    '安徽省': { status: 'pending', deadline: '' },
+                    '福建省': { status: 'pending', deadline: '' },
+                    '江西省': { status: 'pending', deadline: '' },
+                    '山东省': { status: 'published', deadline: '' },
+                    '河南省': { status: 'pending', deadline: '' },
+                    '湖北省': { status: 'published', deadline: '2026-09-24' },
+                    '湖南省': { status: 'published', deadline: '2026-09-29' },
+                    '广东省': { status: 'pending', deadline: '' },
+                    '海南省': { status: 'pending', deadline: '' },
+                    '四川省': { status: 'published', deadline: '2026-10-14' },
+                    '贵州省': { status: 'published', deadline: '2026-10-23' },
+                    '云南省': { status: 'pending', deadline: '' },
+                    '甘肃省': { status: 'published', deadline: '2026-11-06' },
+                    '青海省': { status: 'pending', deadline: '' },
+                    '内蒙古自治区': { status: 'pending', deadline: '' },
+                    '广西壮族自治区': { status: 'pending', deadline: '' },
+                    '宁夏回族自治区': { status: 'pending', deadline: '' },
+                    '新疆维吾尔自治区': { status: 'pending', deadline: '' },
+                    '重庆市': { status: 'published', deadline: '2026-10-23' },
+                    '北京市': { status: 'excluded', deadline: '' },
+                    '天津市': { status: 'excluded', deadline: '' },
+                    '浙江省': { status: 'excluded', deadline: '' },
+                    '陕西省': { status: 'excluded', deadline: '' },
+                    '西藏自治区': { status: 'excluded', deadline: '' },
+                    '台湾省': { status: 'excluded', deadline: '' },
+                    '香港特别行政区': { status: 'excluded', deadline: '' },
+                    '澳门特别行政区': { status: 'excluded', deadline: '' },
+                    '南海诸岛': { status: 'excluded', deadline: '' },
+                }
+            };
+            // ========== 配置区结束：下方为自动计算和原有页面逻辑 ==========
+
             const chart = echarts.init(document.getElementById('china-map'));
             const backBtn = document.getElementById('back-btn');
             const resetBtn = document.getElementById('reset-btn');
@@ -188,7 +241,6 @@
             const policyData = [
                  {
                     name: '上海市',
-                    posted_this_year: 1,
                     policies: [
                         { title: '定向选调', desc: '分综合管理（不限专业）、政法、信息技术、财经、城市建设、卫生健康六大方向，后五类需相应专业', url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/237685690777866240',require:'需满足：1.中共党员（含预备）或学生干部  2.获得荣誉称号或奖学金' },            
                         { title: '御风解读', desc: '上海市近三年选调政策详解', url: 'https://mp.weixin.qq.com/s/vtsYfNHFF1YnZmefKI4TNw' }
@@ -196,7 +248,6 @@
                 },
                 {
                     name: '江苏省',
-                    posted_this_year: 0,
                     policies: [
                         { title: '名校优选', desc: '每年10月中旬开展，限制我校经济类专业，整体要求和难度较高', url: 'https://www.jszzb.gov.cn/tzgg/art/2025/art_311f52a18ad535b3b8642c677450bab1.html', require: '中共党员（含预备）、学生干部经历一年以上、校级以上荣誉全部满足' },
                         { title: '常规选调(乡镇)', desc: '每年10月中旬开展，与名校优选不冲突，要求类似但总体较低', url: 'https://www.jszzb.gov.cn/tzgg/art/2025/art_311f52a18ad535b3b8642c677450bab1.html', require: '中共党员（含预备）、学生干部经历一年以上、校级以上荣誉全部满足，但要求降低' },
@@ -206,7 +257,6 @@
                 },
                 {
                     name: '河北省',
-                    posted_this_year: 0,
                     policies: [
                         { title: '定向选调', desc: '每年12月中下旬开展，限制我校财经类专业', url: 'https://www.hebpta.com.cn/article?artId=13039' },
                         { title: '御风解读', desc: '解析河北省选调近几年的报考条件及相关政策', url: 'https://mp.weixin.qq.com/s/O4lHgSpGx6VlH41TnzZunQ' }
@@ -214,7 +264,6 @@
                 },
                 {
                     name: '山西省',
-                    posted_this_year: 0,
                     policies: [
                         { title: '定向选调', desc: '每年12月中下旬开展，限制我校经济学专业，选调单位为省直、市直机关', url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/142351478252769280', require: '中共党员（含预备）' },
                         { title: '常规选调', desc: '每年1月开展，岗位为乡镇机关', url: 'https://rst.shanxi.gov.cn/rsks/gwyks/2026xdsks/202601/t20260119_10042602.shtml', require: '需同时满足中共党员（含预备）、学生干部经历一年以上或院级以上荣誉或参军两项条件' },
@@ -223,7 +272,6 @@
                 },
                 {
                     name: '辽宁省',
-                    posted_this_year: 0,
                     policies: [
                         { title: '常规选调', desc: '每年12月中下旬开展，岗位包括各地级市直岗位以及乡镇岗位', url: 'https://mp.weixin.qq.com/s/7VZ5Xc8SUa1YOsxTK2peFw', require: '中共党员（含预备）、学业成绩前50%以及学生干部经历 / 校级及以上奖励 / 参加三项之一' },
                         { title: '御风解读', desc: '辽宁省近三年面向上海财经大学选调政策详解', url: 'https://mp.weixin.qq.com/s/Z3Yfxxj8Jpf7D2TC6Kbbbg' }
@@ -231,7 +279,6 @@
                 },
                 {
                     name: '吉林省',
-                    posted_this_year: 0,
                     policies: [
                         { title: '定向选调（长春市）', desc: '每年9月、10月开展，长春市直部门（不含辖区分局）职位要求本科阶段为“双一流”建设高校', url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/113352320124850176', require: '中共党员（含预备）、学生干部经历一年以上、校级以上荣誉以及参军四项之一' },
                         { title: '御风解读', desc: '吉林省近三年面向上海财经大学选调政策详解', url: 'https://mp.weixin.qq.com/s/e4atFteFTcBDoyw0xdm1bw' }
@@ -239,7 +286,6 @@
                 },
                 {
                     name: '黑龙江省',
-                    posted_this_year: 1,
                     policies: [
                         { title: '定向选调', desc: '每年9月开展，有二轮选报', url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/248873946013896704', require: '中共党员（含预备）、学生干部经历半年以上，校级及以上奖励，参军四项之一' },
                         { title: '御风解读', desc: '黑龙江省近三年面向上海财经大学选调政策详解', url: 'https://mp.weixin.qq.com/s/tI8_ld8YEj7UkgNVzE8-XA' }
@@ -247,7 +293,6 @@
                 },
                 {
                     name: '安徽省',
-                    posted_this_year: 0,
                     policies: [
                         { title: '常规选调', desc: '每年1月开展，部分岗位我校不可报', url: 'http://www.apta.gov.cn/Officer/FAnnouncementDetail/1081', require: '中共党员（含预备）、学生干部经历一年以上两项之一' },
                         { title: '御风解读', desc: '安徽省近三年面向上海财经大学选调政策详解', url: 'https://mp.weixin.qq.com/s/R_N3wcqTh3mdtsDlM-06bA' }
@@ -256,7 +301,6 @@
 
                 {
                     name: '福建省',
-                    posted_this_year: 0,
                     policies: [
                         { title: '定向选调', desc: '每年11月中下旬开展，本科、硕士限福建生源，博士不限，法检类岗位要求第一专业须为法学类', url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/133678599759859712', require: '学生干部' },
                         { title: '御风解读', desc: '福建省近三年面向上海财经大学定向选调招录政策详解', url: 'https://mp.weixin.qq.com/s/AXVlp4TOWzGD402RNdi5UA' }
@@ -264,7 +308,6 @@
                 },
                 {
                     name: '江西省',
-                    posted_this_year: 0,
                     policies: [
                         { title: '定向选调', desc: '每年12月中下旬开展，选调单位为省直、市直机关，限应用经济学学科', url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/142351478252769280', require: '中共党员（含预备）、学生干部经历一年以上、校级及以上荣誉三项全满足' },
                         { title: '御风解读没', desc: '山西省近三年面向上海财经大学选调政策详解', url: 'https://mp.weixin.qq.com/s/kBwLkWmp61qLMUmMk0o66g' }
@@ -272,7 +315,6 @@
                 },
                 {
                     name: '山东省',
-                    posted_this_year: 1,
                     policies: [
                         { title: '定向选调', desc: '每年十一月初开展，选调政策基本稳定，招录流程节奏平稳，计划名额略有增加', url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/248875646556704768', require: '中共党员（含预备）、学生干部经历两项需全满足，获得校级以上（含校级）综合性荣誉称号者优先' },
                         { title: '御风解读', desc: '山东省近三年面向上海财经大学选调政策详解', url: 'https://mp.weixin.qq.com/s/2Mz-wbb8S255KbHESxMTDQ' }
@@ -280,14 +322,12 @@
                 },
                 {
                     name: '河南省',
-                    posted_this_year: 0,
                     policies: [
                         { title: '常规选调', desc: '每年1月开展，法检专项限法学专业，报考法院系统需通过国家统一法律职业资格考试，成绩达到A类证书标准', url: 'http://xds.jyt.henan.gov.cn/front/newsDetail?newsId=09fe98e4-77af-410a-bc83-5ee14c8d1804', require: '需满足中共党员（含预备）、学生干部经历一年以上、校级以上荣誉、参军四项条件之一' }
                     ]
                 },
                 {
                     name: '湖北省',
-                    posted_this_year: 1,
                     policies: [
                         { title: '定向选调', desc: '每年11月中上旬开展，岗位为县级机关', url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/238057276131381248', require: '需满足中共党员（含预备）、学生干部经历一年以上、校级以上荣誉三项条件之一' },
                         { title: '常规选调',desc:'每年1月开展',url: 'https://rst.hubei.gov.cn/hbrsksw/zlplks/jglyks/hbsxtsks/zkgg/202601/t20260112_5853031.shtml', require: '需满足中共党员（含预备）、学生干部经历一年以上、校级以上荣誉三项条件之一' },
@@ -296,7 +336,6 @@
                 },
                 {
                     name: '湖南省',
-                    posted_this_year: 1,
                     policies: [
                         { title: '定向选调', desc: '每年九月底开展', url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/241876932982083584', require: '中共党员' },
                         { title: '常规选调',desc:'每年10月中旬开展',url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/241879197910437888', require: '需同时满足中共党员（含预备）、学生干部经历一年以上两项条件' },
@@ -305,7 +344,6 @@
                 },
                 {
                     name: '广东省',
-                    posted_this_year: 0,
                     policies: [
                         { title: '常规选调', desc: '每年12月上旬开展，要求以最高学历报考，岗位限制应用经济学专业', url: 'https://www.gdzz.gov.cn/tzgg/content/post_24297.html', require: '需同时满足中共党员（含预备）或学生干部经历一年以上或校级以上荣誉或参军、学业成绩前50%两项条件' },
                         { title: '御风解读', desc: '解析广东省选调近几年的报考条件及相关政策', url: 'https://mp.weixin.qq.com/s/uDAOlVyLAAOZcO9onUYTRA' }
@@ -313,7 +351,6 @@
                 },
                 {
                     name: '海南省',
-                    posted_this_year: 0,
                     policies: [
                         { title: '定向选调', desc: '每年1月开展，岗位为省级以下', url: 'https://www.nanhaixf.gov.cn/articles/59/48943.htm' } ,
                         { title: '御风解读', desc: '解析海南省选调近几年的报考条件及相关政策', url: 'https://mp.weixin.qq.com/s/X7WShkYGztfgJtyAnBpVRQ' }
@@ -321,7 +358,6 @@
                 },
                 {
                     name: '四川省',
-                    posted_this_year: 1,
                     policies: [
                         { title: '急需紧缺选调', desc: '每年10月中下旬开展，本科与研究生各有不同的专业限制，满足部分条件不限专业', url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/241966490058887168', require: '中共党员（含预备）、学生干部经历一年以上、国家级奖学金，校级及以上“优秀青年马克思主义者培养工程”培养对象、院系级及以上荣誉称号、参军六项之一' },
                         { title: '常规选调', desc: '每年11月-12月开展', url: 'https://www.scpta.com.cn/front/News/info/5786130dd0d2460aa5ec2ba91853f59e', require: '中共党员（含预备）、学生干部经历一年以上、国家级奖学金，校级及以上“优秀青年马克思主义者培养工程”培养对象、院系级及以上荣誉称号、参军、取得省级“大学生综合素质A级证书”七项之一' },
@@ -330,7 +366,6 @@
                 },
                 {
                     name: '贵州省',
-                    posted_this_year: 1,
                     policies: [
                         { title: '定向选调', desc: '每年10月中旬开展，党政机关职位专业限制：财经方向、法学方向、信息技术方向、文史哲方向。省属企事业单位职位专业设置为学科门类、具体专业或不限专业。', url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/243134517622214656', require: '本科毕业生：中共党员（含预备）、学生干部经历一年以上，校级以上奖学金，院系级以上表彰、参军五项之一' },
                         { title: '御风解读', desc: '贵州省近三年面向上海财经大学选调政策详解', url: 'https://mp.weixin.qq.com/s/rY6yGBLZyJjD9tz8549wIQ' }
@@ -338,7 +373,6 @@
                 },
                 {
                     name: '云南省',
-                    posted_this_year: 0,
                     policies: [
                         { title: '定向选调', desc: '每年11月开展，正常可以报考B类、C类、D类职位，博士研究生还可选择A类职位报考', url: 'https://mp.weixin.qq.com/s/g6UDst8CvdJcplsOZxOUOw', require: '中共党员（含预备）' },
                         { title: '御风解读', desc: '云南省近三年面向上海财经大学选调政策详解', url: 'https://mp.weixin.qq.com/s/1tLHBez0CRXVhIRxx0DRpg' }
@@ -346,7 +380,6 @@
                 },
                 {
                     name: '甘肃省',
-                    posted_this_year: 1,
                     policies: [
                         { title: '常规选调',  desc:'每年九月中下旬开展',url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/242030250551283712'},
                         { title: '政法专项选调', desc: '岗位限制法学专业', url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/109014812394131456' },
@@ -355,7 +388,6 @@
                 },
                 {
                     name: '青海省',
-                    posted_this_year: 0,
                     policies: [
                         { title: '定向选调', desc:'每年11月开展',url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/124949849425711104', require: '需满足中共党员（含预备）、学生干部经历一年以上、校级及以上荣誉、参军四项条件之一' },
                         { title: '常规非专项选调', desc: '每年11月开展，岗位为县乡机关', url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/124949849425711104', require: '需满足中共党员（含预备）、学生干部经历一年以上、校级及以上荣誉、参军四项条件之一' },
@@ -364,7 +396,6 @@
                 },
                 {
                     name: '内蒙古自治区',
-                    posted_this_year: 0,
                     policies: [
                         { title: '常规选调', desc: '每年1月中上旬开展，岗位为苏木乡镇岗', url: 'http://www.impta.com.cn/xuandiaosheng/2026121112113.asp', require: '需满足中共党员（含预备）、学生干部经历一年以上且校级及以上荣誉、参军三项条件之一' },
                         { title: '政法专项选调', desc: '每年11月中上旬开展，法检专项限制法学专业，报考法院系统需通过国家统一法律职业资格考试，成绩达到A类证书标准', url: 'http://www.impta.com.cn/xuandiaosheng/2025116172330.asp' },
@@ -373,7 +404,6 @@
                 },
                 {
                     name: '广西壮族自治区',
-                    posted_this_year: 0,
                     policies: [
                         { title: '定向选调', desc: '每年10月下旬开展，岗位限制经济、财政、金融、会计、财务、投资、保险、统计、法学专业，法学专业在报到时须获得国家法律职业资格证书（A证），志愿到县乡基层工作的除外', url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/123885965407293440', require: '需满足中共党员（含预备）、学生干部经历一年以上或校级及以上荣誉、参军三项条件之一' },
                         { title: '常规选调', desc:'每年1月开展',url: 'https://www.gxpta.com.cn/ksxm/gwyzlks/gx2026ndkslygwyxdszt/2026nxdsgg/t13231.html', require: '需满足中共党员（含预备）、共青团员且学生干部经历一年以上或院级以上荣誉或校级以上奖学金、参军、校级以上“青年马克思主义者培养工程”学员四项条件之一' },
@@ -382,14 +412,12 @@
                 },
                 {
                     name: '宁夏回族自治区',
-                    posted_this_year: 0,
                     policies: [
                         { title: '定向选调', desc: '每年10月中下旬开展，岗位限制应用经济学专业', url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/122466933659537408' }
                     ]
                 },
                 {
                     name: '新疆维吾尔自治区',
-                    posted_this_year: 0,
                     policies: [
                         { title: '定向选调', desc: '每年10月中下旬开展，岗位限制区级硕士及以上学历，地及以下不限学历，以最高学历报考。应用经济学可报所有岗位，其他可报地县岗位。报考法官助理、检察官助理以及行政机关中行政处罚决定审核、行政复议、行政裁决、法律顾问等职位的，应当取得相应法律职业资格证书', url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/121301989484269568' },
                         { title: '御风解读', desc: '解析新疆维吾尔自治区选调近几年的报考条件及相关政策', url: 'https://mp.weixin.qq.com/s/eqByX-CZ8NKi0s5ClokDBQ' }
@@ -397,7 +425,6 @@
                 },
                 {
                     name: '重庆市',
-                    posted_this_year: 1,
                     policies: [
                         { title: '定向选调', desc: '每年9月下旬开展，有专业限制，获得过表彰、担任过学生干部可不限专业', url: 'https://career.sufe.edu.cn/career/news/view/dxxdnews/248874926449233920', require: '中共党员（含预备），院系以上优秀学生干部或副班长以上学生干部，校级以上荣誉，参军四项之一' },
                         { title: '御风解读', desc: '重庆市近三年面向上海财经大学定向选调政策详解', url: 'https://mp.weixin.qq.com/s/hk3HHp33tgTVbGFE9lrOdw' },
@@ -406,38 +433,116 @@
 ,
                 {
                     name: '北京市',
-                    posted_this_year: 0,
                     policies: []
                 },
                 {
                     name: '天津市',
-                    posted_this_year: 0,
                     policies: []
                 },
                 {
                     name: '浙江省',
-                    posted_this_year: 0,
                     policies: []
                 },
                 {
                     name: '陕西省',
-                    posted_this_year: 0,
                     policies: []
                 },
                 {
                     name: '西藏自治区',
-                    posted_this_year: 0,
                     policies: []
                 }
             ];
 
-            // 每年维护省级 posted_this_year：1 为已出公告，0 为未出公告。
+
+            // Deadline parsing never depends on the visitor's device timezone.
+            function parseDeadline(value) {
+                if (!value || typeof value !== 'string') return null;
+                const match = value.trim().match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?$/);
+                if (!match) return null;
+                const year = Number(match[1]), month = Number(match[2]), day = Number(match[3]);
+                const dateOnly = match[4] === undefined;
+                const hour = dateOnly ? 23 : Number(match[4]);
+                const minute = dateOnly ? 59 : Number(match[5]);
+                const second = dateOnly ? 59 : Number(match[6] || 0);
+                const ms = dateOnly ? 999 : 0;
+                const utc = Date.UTC(year, month - 1, day, hour, minute, second, ms);
+                const date = new Date(utc);
+                if (year < 2000 || date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1
+                    || date.getUTCDate() !== day || hour > 23 || minute > 59 || second > 59) return null;
+                return utc - 8 * 60 * 60 * 1000;
+            }
+
+            function getProvinceState(name, now = Date.now()) {
+                const config = MAP_STATUS_CONFIG.provinces[name] || { status: 'pending', deadline: '' };
+                if (config.status === 'excluded') return 'excluded';
+                if (config.status !== 'published') return 'pending';
+                const deadline = parseDeadline(config.deadline);
+                return deadline !== null && now > deadline ? 'expired' : 'published';
+            }
+
+            function makeMapData(now = Date.now()) {
+                return policyData.map(region => {
+                    const state = getProvinceState(region.name, now);
+                    const color = MAP_STATUS_CONFIG.colors[state];
+                    return {
+                        ...region,
+                        posted_this_year: MAP_STATUS_CONFIG.provinces[region.name]?.status === 'published' ? 1 : 0,
+                        itemStyle: { areaColor: color.normal },
+                        emphasis: { itemStyle: { areaColor: color.hover } }
+                    };
+                }).concat(forbiddenRegions.map(name => ({
+                    name,
+                    itemStyle: { areaColor: MAP_STATUS_CONFIG.colors[getProvinceState(name, now)].normal },
+                    emphasis: { disabled: true },
+                    label: { show: false },
+                    select: { disabled: true },
+                    tooltip: { show: false }
+                })));
+            }
+
+            let deadlineTimer = null;
+            let renderedStatusKey = '';
+            function getStatusKey(now = Date.now()) {
+                return policyData.map(region => region.name).concat(forbiddenRegions)
+                    .map(name => getProvinceState(name, now)).join(',');
+            }
+
+            function refreshDeadlineColors() {
+                clearTimeout(deadlineTimer);
+                const now = Date.now();
+                const key = getStatusKey(now);
+                if (currentLevel === 'china' && activeGeoJson && key !== renderedStatusKey) {
+                    chart.setOption({ series: [{ data: makeMapData(now) }] });
+                    renderedStatusKey = key;
+                }
+                // Re-check exactly after the nearest deadline, including while the page stays open.
+                const next = Object.values(MAP_STATUS_CONFIG.provinces)
+                    .filter(config => config.status === 'published')
+                    .map(config => parseDeadline(config.deadline))
+                    .filter(deadline => deadline !== null && deadline >= now)
+                    .sort((a, b) => a - b)[0];
+                if (next !== undefined) {
+                    deadlineTimer = setTimeout(refreshDeadlineColors, Math.min(next - now + 1, 2147483647));
+                }
+            }
+
+            // Invalid dates do not silently turn a province into an expired province.
+            Object.entries(MAP_STATUS_CONFIG.provinces).forEach(([name, config]) => {
+                if (config.deadline && parseDeadline(config.deadline) === null) {
+                    console.warn(name + '：deadline 格式或日期无效，请按配置区注释填写。');
+                }
+            });
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) refreshDeadlineColors();
+            });
+            window.addEventListener('focus', refreshDeadlineColors);
+
             function showOverview() {
                 const isChina = currentLevel === 'china';
-                const postedCount = policyData.filter(region => region.posted_this_year === 1).length;
+                const postedCount = policyData.filter(region => MAP_STATUS_CONFIG.provinces[region.name]?.status === 'published').length;
                 document.getElementById('selectedRegion').innerText = isChina ? '全国总览' : '上海市总览';
                 document.getElementById('regionData').innerText = isChina
-                    ? `今年已有${postedCount}个省（浅金色）发布公告，请点击区域查看详情，单击条目小标题可以跳转链接`
+                    ? `今年已有${postedCount}个省发布公告（浅金色未截止，灰蓝色已截止），请点击区域查看详情，单击条目小标题可以跳转链接`
                     : '请点击区域查看详情，单击条目小标题可以跳转链接';
             }
 
@@ -457,13 +562,7 @@
                 loadMap(url).then(geoJson => {
                     activeGeoJson = geoJson;
                     echarts.registerMap(mapName, geoJson);
-                    const silentStyles = forbiddenRegions.map(name => ({
-                        name: name,
-                        itemStyle: { areaColor: '#f2f2f2' },
-                        emphasis: { disabled: true },
-                        label: { show: false },
-                        select: { disabled: true }
-                    }));
+
 
                     const option = {
                         tooltip: { show: !directTouch, trigger: 'item', formatter: (params) => forbiddenRegions.includes(params.name) ? null : params.name },
@@ -478,15 +577,12 @@
                             emphasis: { itemStyle: { areaColor: '#ffe4e1' } },
                             select: { itemStyle: { areaColor: '#0052d9' }, label: { color: '#fff' } },
                             selectedMode: 'single',
-                            data: isChina ? policyData.map(region => ({
-                                ...region,
-                                itemStyle: { areaColor: region.posted_this_year === 1 ? '#f6dfa0' : '#f9f9f9' },
-                                emphasis: { itemStyle: { areaColor: region.posted_this_year === 1 ? '#edca73' : '#ffe4e1' } }
-                            })) : [],
-                            regions: silentStyles
+                            data: isChina ? makeMapData() : [],
                         }]
                     };
                     chart.setOption(option, true);
+                    renderedStatusKey = getStatusKey();
+                    refreshDeadlineColors();
                 }).catch(() => {
                     document.getElementById('regionData').innerText = '地图加载失败，请检查网络后刷新重试。';
                 });
@@ -620,7 +716,8 @@
                     }
                     */
                 } else {
-                    contentEl.innerText = "我校暂未被纳入选调范围";
+                    contentEl.innerText = getProvinceState(regionName) === 'excluded'
+                        ? '我校不在该地区选调高校范围内' : '暂未收录相关信息';
                 }
             }
 
@@ -642,5 +739,6 @@
     </script>
 </body>
 </html>
+
 
 
