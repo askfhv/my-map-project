@@ -94,6 +94,8 @@
                 }
 
                 mapElement.addEventListener('touchstart', event => {
+                    // Gestures take over immediately; do not let a tap transition keep moving the map.
+                    chart.setOption({ series: [{ animation: false }] });
                     if (event.touches.length === 1) {
                         touchMoved = false;
                         suppressMapClickUntil = 0;
@@ -522,17 +524,22 @@
                     if (area > largestArea) { largestArea = area; bounds = box; }
                 });
                 const center = bounds ? [(bounds[0] + bounds[2]) / 2, (bounds[1] + bounds[3]) / 2] : pos;
-                chart.setOption({ series: [{ center: center || null, zoom: 1, layoutCenter: ['50%', '50%'] }] });
+                const currentZoom = chart.getOption().series[0].zoom || 1;
                 let fittedZoom = zoom;
                 if (bounds) {
                     const a = chart.convertToPixel({ seriesIndex: 0 }, [bounds[0], bounds[1]]);
                     const b = chart.convertToPixel({ seriesIndex: 0 }, [bounds[2], bounds[3]]);
                     const width = Math.abs(b[0] - a[0]), height = Math.abs(b[1] - a[1]);
                     if (width > 0 && height > 0) {
-                        fittedZoom = Math.min(zoom, (chart.getWidth() - 32) / width, (availableHeight - 32) / height);
+                        fittedZoom = Math.min(zoom, currentZoom * (chart.getWidth() - 32) / width, currentZoom * (availableHeight - 32) / height);
                     }
                 }
-                chart.setOption({ series: [{ zoom: Math.max(currentLevel === 'china' ? 1 : 0.8, fittedZoom) }] });
+                chart.setOption({ series: [{
+                    center: center || null,
+                    zoom: Math.max(currentLevel === 'china' ? 1 : 0.8, fittedZoom),
+                    layoutCenter: ['50%', '50%'],
+                    animation: true, animationDurationUpdate: 400, animationEasingUpdate: 'cubicOut'
+                }] });
                 chart.dispatchAction({ type: 'hideTip' });
             }
 
@@ -541,7 +548,7 @@
 
             resetBtn.onclick = function () {
                 restoreMapViewport();
-                chart.setOption({ series: [{ center: null, zoom: currentLevel === 'china' ? 1.2 : 1, layoutCenter: ['50%', currentLevel === 'china' ? '60%' : '50%'] }] });
+                chart.setOption({ series: [{ center: null, zoom: currentLevel === 'china' ? 1.2 : 1, layoutCenter: ['50%', currentLevel === 'china' ? '60%' : '50%'], animation: true, animationDurationUpdate: 400, animationEasingUpdate: 'cubicOut' }] });
                 currentSelected = null;
                 showOverview();
                 chart.dispatchAction({ type: 'unSelect' });
@@ -556,7 +563,7 @@
                 }
                 if (currentSelected === name) {
                     restoreMapViewport();
-                chart.setOption({ series: [{ center: null, zoom: currentLevel === 'china' ? 1.2 : 1, layoutCenter: ['50%', currentLevel === 'china' ? '60%' : '50%'] }] });
+                chart.setOption({ series: [{ center: null, zoom: currentLevel === 'china' ? 1.2 : 1, layoutCenter: ['50%', currentLevel === 'china' ? '60%' : '50%'], animation: true, animationDurationUpdate: 400, animationEasingUpdate: 'cubicOut' }] });
                     currentSelected = null;
                     showOverview();
                 } else {
