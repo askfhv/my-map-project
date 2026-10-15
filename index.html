@@ -603,8 +603,8 @@
                 const container = mapElement.parentElement.getBoundingClientRect();
                 const card = document.querySelector('.info-card').getBoundingClientRect();
                 const availableHeight = Math.max(120, Math.min(container.height, card.top - container.top - 16));
-                mapElement.style.height = availableHeight + 'px';
-                chart.resize();
+                // Keep the full canvas behind the floating card; move only the map's focus.
+                const focusY = (availableHeight / Math.max(1, container.height)) * 50;
                 // Fit the main landmass; distant offshore islands must not shrink the province to a dot.
                 const feature = activeGeoJson && activeGeoJson.features.find(item => item.properties.name === name);
                 const geometry = feature && feature.geometry;
@@ -633,7 +633,7 @@
                 chart.setOption({ series: [{
                     center: center || null,
                     zoom: Math.max(currentLevel === 'china' ? 1 : 0.8, fittedZoom),
-                    layoutCenter: ['50%', '50%'],
+                    layoutCenter: ['50%', focusY + '%'],
                     animation: true, animationDurationUpdate: 400, animationEasingUpdate: 'cubicOut'
                 }] });
                 chart.dispatchAction({ type: 'hideTip' });
